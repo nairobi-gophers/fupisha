@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/nairobi-gophers/fupisha/internal/store/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,6 +15,7 @@ type urlStore struct {
 	ctx context.Context
 }
 
+//New creates a new url document.
 func (u *urlStore) New(userID, originalURL, shortenedURL, customAlias, target string) error {
 	uid, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
@@ -37,10 +37,11 @@ func (u *urlStore) New(userID, originalURL, shortenedURL, customAlias, target st
 	return nil
 }
 
-func (u *urlStore) Get(id int) (model.URL, error) {
+//Get finds a url by id
+func (u *urlStore) Get(id string) (model.URL, error) {
 	url := model.URL{}
 
-	docID, err := primitive.ObjectIDFromHex(strconv.Itoa(id))
+	docID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return url, err
 	}
