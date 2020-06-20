@@ -1,0 +1,25 @@
+version: "3"
+services:
+  mongodb:
+    image: mongo:4.2.0
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=fupisha
+      - MONGO_INITDB_USERNAME=fupisha
+      - MONGO_INITDB_PASSWORD=fupisha
+      - MONGO_INITDB_ROOT_USERNAME=fp_root
+      - MONGO_INITDB_ROOT_PASSWORD=fp_s3cr37_!
+    ports:
+      - "27017-27019:27017-27019" # use any default port from 27017 to 27019
+    volumes:
+      - "./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro" # copy init-mongo.sh to /docker-entrypoint-initdb.d/ as a read only file./docker-entrypoint-initdb.d is a folder that is already created inside the mongo container used for initiating database, so we copy our script to that folder
+      - "mongo_data:/data/db" # persist data on the container in a local folder named mongo-data. /data/db/ is a folder that already created inside the mongo container.
+    networks:
+      - mongo_network
+
+volumes:
+  mongo_data:
+
+networks:
+  mongo_network:
+    driver: "bridge"
