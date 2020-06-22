@@ -13,7 +13,6 @@ type URL struct {
 	OriginalURL  string             `bson:"originalURL,omitempty"`
 	ShortenedURL string             `bson:"shortenedURL,omitempty"`
 	VisitCount   int                `bson:"visitCount,omitempty"`
-	Target       string             `bson:"target,omitempty"`
 	CreatedAt    time.Time          `bson:"createdAt,omitempty"`
 	UpdatedAt    time.Time          `bson:"updatedAt,omitempty"`
 }
