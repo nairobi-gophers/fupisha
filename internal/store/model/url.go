@@ -12,7 +12,6 @@ type URL struct {
 	User         primitive.ObjectID `bson:"user,omitempty"`
 	OriginalURL  string             `bson:"originalURL,omitempty"`
 	ShortenedURL string             `bson:"shortenedURL,omitempty"`
-	CustomAlias  string             `bson:"customAlias,omitempty"`
 	VisitCount   int                `bson:"visitCount,omitempty"`
 	Target       string             `bson:"target,omitempty"`
 	CreatedAt    time.Time          `bson:"createdAt,omitempty"`
