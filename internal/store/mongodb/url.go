@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"time"
 
 	"github.com/nairobi-gophers/fupisha/internal/store/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,6 +28,7 @@ func (u *urlStore) New(userID, originalURL, shortenedURL string) (interface{}, e
 		User:         uid,
 		OriginalURL:  originalURL,
 		ShortenedURL: shortenedURL,
+		CreatedAt:    time.Now(),
 	}
 
 	result, err := u.db.Collection("urls").InsertOne(u.ctx, url)
