@@ -46,7 +46,7 @@ func (u *urlStore) Get(id string) (model.URL, error) {
 		return url, err
 	}
 
-	if err := u.db.Collection("urls").FindOne(u.ctx, bson.M{"_id": docID}).Decode(url); err != nil {
+	if err := u.db.Collection("urls").FindOne(u.ctx, bson.M{"_id": docID}).Decode(&url); err != nil {
 		return url, err
 	}
 
