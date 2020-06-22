@@ -16,18 +16,18 @@ type urlStore struct {
 }
 
 //New creates a new url document.
-func (u *urlStore) New(userID, originalURL, shortenedURL, customAlias, target string) error {
+func (u *urlStore) New(userID, originalURL, shortenedURL, target string) error {
 	uid, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
 	}
 
 	url := model.URL{
-		ID:          primitive.NewObjectID(),
-		User:        uid,
-		OriginalURL: originalURL,
-		CustomAlias: customAlias,
-		Target:      target,
+		ID:           primitive.NewObjectID(),
+		User:         uid,
+		OriginalURL:  originalURL,
+		ShortenedURL: shortenedURL,
+		Target:       target,
 	}
 
 	if _, err := u.db.Collection("urls").InsertOne(u.ctx, url); err != nil {
