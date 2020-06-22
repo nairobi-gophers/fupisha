@@ -17,6 +17,6 @@ type UserStore interface {
 
 //URLStore is a url data store interface.
 type URLStore interface {
-	New(userID, originalURL, shortenedURL, customAlias, target string) error
+	New(userID, originalURL, shortenedURL string) error
 	Get(id string) (model.URL, error)
 }
