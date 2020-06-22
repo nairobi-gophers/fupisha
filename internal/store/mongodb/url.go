@@ -16,10 +16,10 @@ type urlStore struct {
 }
 
 //New creates a new url document.
-func (u *urlStore) New(userID, originalURL, shortenedURL string) error {
+func (u *urlStore) New(userID, originalURL, shortenedURL string) (interface{}, error) {
 	uid, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	url := model.URL{
@@ -29,11 +29,12 @@ func (u *urlStore) New(userID, originalURL, shortenedURL string) error {
 		ShortenedURL: shortenedURL,
 	}
 
-	if _, err := u.db.Collection("urls").InsertOne(u.ctx, url); err != nil {
-		return err
+	result, err := u.db.Collection("urls").InsertOne(u.ctx, url)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return result.InsertedID, nil
 }
 
 //Get finds a url by id
