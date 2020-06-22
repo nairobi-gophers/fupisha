@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func TestNew(t *testing.T) {
+func TestUser(t *testing.T) {
 	s, teardown := testConn(t)
 	defer teardown("users")
 
