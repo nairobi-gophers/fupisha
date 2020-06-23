@@ -53,14 +53,21 @@ func TestUser(t *testing.T) {
 		t.Fatalf("bad user.CreatedAt: %v", user.CreatedAt)
 	}
 
+	beforeVerificationExpiry := user.VerificationExpires.Sub(time.Now())
+
+	//We are checking how many minutes we have until the verification token expires.It cannot be 60 since some seconds elapse between creating the token and the point at which we are verifying it.It should be less than 60.
+	if beforeVerificationExpiry.Minutes() == 60 || beforeVerificationExpiry.Minutes() > 60 || beforeVerificationExpiry.Minutes() < 0 {
+		t.Fatalf("bad user.VerificationExpires: %v", user.VerificationExpires)
+	}
+
 	want := model.User{
 		ID:                   id.(primitive.ObjectID),
 		Name:                 "test_user1",
 		Email:                "test_user1@test.com",
 		ResetPasswordExpires: time.Time{},
 		ResetPasswordToken:   "",
-		VerificationExpires:  time.Time{},
-		VerificationToken:    "",
+		VerificationExpires:  user.VerificationExpires,
+		VerificationToken:    user.VerificationToken,
 		Verified:             false,
 		Password:             user.Password,
 		CreatedAt:            user.CreatedAt,
@@ -89,8 +96,8 @@ func TestUser(t *testing.T) {
 		APIKey:               apiKey,
 		ResetPasswordExpires: time.Time{},
 		ResetPasswordToken:   "",
-		VerificationExpires:  time.Time{},
-		VerificationToken:    "",
+		VerificationExpires:  user.VerificationExpires,
+		VerificationToken:    user.VerificationToken,
 		Verified:             false,
 		Password:             user.Password,
 		CreatedAt:            user.CreatedAt,
