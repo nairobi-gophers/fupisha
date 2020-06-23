@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/nairobi-gophers/fupisha/internal/store/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -63,5 +64,31 @@ func TestUser(t *testing.T) {
 
 	if _, err := user.Compare(user.Password, "test_password1"); err != nil {
 		t.Fatalf("failed to compare password: %s", err)
+	}
+
+	apiKey, _ := uuid.FromString("5bcd34d1-6bc2-464e-b0ab-6ca76f3c6f1b")
+
+	user, err = s.Users().SetAPIKey(uid, apiKey)
+	if err != nil {
+		t.Fatalf("failed to set api key: %s", err)
+	}
+
+	want = model.User{
+		ID:                   id.(primitive.ObjectID),
+		Name:                 "test_user1",
+		Email:                "test_user1@test.com",
+		APIKey:               apiKey,
+		ResetPasswordExpires: time.Time{},
+		ResetPasswordToken:   "",
+		VerificationExpires:  time.Time{},
+		VerificationToken:    "",
+		Verified:             false,
+		Password:             user.Password,
+		CreatedAt:            user.CreatedAt,
+		UpdatedAt:            time.Time{},
+	}
+
+	if !reflect.DeepEqual(user, want) {
+		t.Fatalf("got user %+v want %+v", user, want)
 	}
 }
