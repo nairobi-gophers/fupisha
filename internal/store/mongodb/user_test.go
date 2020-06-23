@@ -24,10 +24,19 @@ func TestUser(t *testing.T) {
 		t.Fatalf("failed to assert the created test_user1 insert id")
 	}
 
-	_, err = s.Users().New("test_user2", "test_user2@test.com", "test_password2")
+	_, err = s.Users().New("test_user2", "test_user1@test.com", "test_password2")
+
+	if err == nil {
+		t.Fatalf("no error on creating account with an existing email")
+	}
+
+	if _, ok := id.(primitive.ObjectID); !ok {
+		t.Fatalf("failed to assert the created test_user1 insert id")
+	}
+	_, err = s.Users().New("test_user3", "test_user3@test.com", "test_password3")
 
 	if err != nil {
-		t.Fatalf("failed to create test_user2: %s", err)
+		t.Fatalf("failed to create test_user3: %s", err)
 	}
 
 	//convert the ObjectID to string "5d0575344d9f7ff15e989174"
