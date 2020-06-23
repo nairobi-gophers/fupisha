@@ -1,6 +1,9 @@
 package store
 
-import "github.com/nairobi-gophers/fupisha/internal/store/model"
+import (
+	"github.com/gofrs/uuid"
+	"github.com/nairobi-gophers/fupisha/internal/store/model"
+)
 
 //Store is a data store interface.
 type Store interface {
@@ -13,6 +16,7 @@ type UserStore interface {
 	New(name, email, password string) (interface{}, error)
 	Get(id string) (model.User, error)
 	GetByEmail(email string) (model.User, error)
+	SetAPIKey(id string, key uuid.UUID) (model.User, error)
 }
 
 //URLStore is a url data store interface.
