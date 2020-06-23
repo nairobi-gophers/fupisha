@@ -4,9 +4,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/nairobi-gophers/fupisha/internal/store/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -64,4 +66,35 @@ func (s userStore) GetByEmail(email string) (model.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s userStore) SetAPIKey(id string, key uuid.UUID) (model.User, error) {
+
+	docID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	filter := bson.M{"_id": docID}
+	update := bson.M{
+		"$set": model.User{APIKey: key},
+	}
+
+	upsert := true
+	after := options.After
+	opt := options.FindOneAndUpdateOptions{
+		ReturnDocument: &after,
+		Upsert:         &upsert,
+	}
+
+	result := s.db.Collection("users").FindOneAndUpdate(s.ctx, filter, update, &opt)
+
+	if result.Err() != nil {
+		return model.User{}, result.Err()
+	}
+
+	doc := model.User{}
+	decodeErr := result.Decode(&doc)
+
+	return doc, decodeErr
 }
