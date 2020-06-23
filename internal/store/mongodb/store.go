@@ -3,9 +3,11 @@ package mongodb
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/nairobi-gophers/fupisha/internal/store"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,6 +24,11 @@ type Store struct {
 
 //Users returns a user store
 func (s *Store) Users() store.UserStore {
+	//create a unique index on user email field.
+	if _, err := s.db.Collection("users").Indexes().CreateOne(context.Background(), mongo.IndexModel{Keys: bson.M{"email": 1}, Options: options.Index().SetUnique(true)}); err != nil {
+		log.Fatalf("Users: failed to create unique index: %s", err)
+	}
+
 	return s.userStore
 }
 
