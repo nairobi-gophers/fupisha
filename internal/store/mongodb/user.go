@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/nairobi-gophers/fupisha/internal/pkg/v1/encoding"
 	"github.com/nairobi-gophers/fupisha/internal/store/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,12 +22,16 @@ type userStore struct {
 //New creates a new user document
 func (s userStore) New(name, email, password string) (interface{}, error) {
 
+	tkn := encoding.Generate()
+
 	user := model.User{
-		ID:        primitive.NewObjectID(),
-		Name:      name,
-		Email:     email,
-		Password:  password,
-		CreatedAt: time.Now(),
+		ID:                  primitive.NewObjectID(),
+		Name:                name,
+		Email:               email,
+		Password:            password,
+		VerificationToken:   tkn,
+		VerificationExpires: time.Now().Add(time.Minute * 60), //60 mins
+		CreatedAt:           time.Now(),
 	}
 
 	if err := user.HashPassword(); err != nil {
