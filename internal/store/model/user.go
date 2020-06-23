@@ -20,7 +20,7 @@ type User struct {
 	ResetPasswordExpires time.Time          `bson:"resetPasswordExpires,omitempty"`
 	ResetPasswordToken   string             `bson:"resetPasswordToken,omitempty"`
 	VerificationExpires  time.Time          `bson:"verificationExpires,omitempty"`
-	VerificationToken    string             `bson:"verificationToken,omitempty"`
+	VerificationToken    uuid.UUID          `bson:"verificationToken,omitempty"`
 	Verified             bool               `bson:"verified,omitempty"`
 }
 
