@@ -20,9 +20,11 @@ type userStore struct {
 }
 
 //New creates a new user document
-func (s userStore) New(name, email, password string) (interface{}, error) {
+func (s userStore) New(name, email, password string) (primitive.ObjectID, error) {
 
 	tkn := encoding.Generate()
+
+	var insertedID primitive.ObjectID //zero value
 
 	user := model.User{
 		ID:                  primitive.NewObjectID(),
@@ -35,15 +37,15 @@ func (s userStore) New(name, email, password string) (interface{}, error) {
 	}
 
 	if err := user.HashPassword(); err != nil {
-		return nil, err
+		return insertedID, err
 	}
 
 	result, err := s.db.Collection("users").InsertOne(s.ctx, user)
 	if err != nil {
-		return nil, err
+		return insertedID, err
 	}
 
-	return result.InsertedID, nil
+	return result.InsertedID.(primitive.ObjectID), nil
 }
 
 //Get finds a user by id
