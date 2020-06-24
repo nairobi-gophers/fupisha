@@ -7,7 +7,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/nairobi-gophers/fupisha/internal/store/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestUser(t *testing.T) {
@@ -20,19 +19,12 @@ func TestUser(t *testing.T) {
 		t.Fatalf("failed to create test_user1: %s", err)
 	}
 
-	if _, ok := id.(primitive.ObjectID); !ok {
-		t.Fatalf("failed to assert the created test_user1 insert id")
-	}
-
 	_, err = s.Users().New("test_user2", "test_user1@test.com", "test_password2")
 
 	if err == nil {
 		t.Fatalf("no error on creating account with an existing email")
 	}
 
-	if _, ok := id.(primitive.ObjectID); !ok {
-		t.Fatalf("failed to assert the created test_user1 insert id")
-	}
 	_, err = s.Users().New("test_user3", "test_user3@test.com", "test_password3")
 
 	if err != nil {
@@ -40,7 +32,7 @@ func TestUser(t *testing.T) {
 	}
 
 	//convert the ObjectID to string "5d0575344d9f7ff15e989174"
-	uid := id.(primitive.ObjectID).Hex()
+	uid := id.Hex()
 
 	user, err := s.Users().Get(uid)
 
@@ -55,13 +47,15 @@ func TestUser(t *testing.T) {
 
 	beforeVerificationExpiry := user.VerificationExpires.Sub(time.Now())
 
-	//We are checking how many minutes we have until the verification token expires.It cannot be 60 since some seconds elapse between creating the token and the point at which we are verifying it.It should be less than 60.
+	//We are checking how many minutes we have until the verification token expires.
+	//It cannot be 60 since some seconds elapse between creating the token and the point at which we are verifying it.
+	//It should be less than 60.
 	if beforeVerificationExpiry.Minutes() == 60 || beforeVerificationExpiry.Minutes() > 60 || beforeVerificationExpiry.Minutes() < 0 {
 		t.Fatalf("bad user.VerificationExpires: %v", user.VerificationExpires)
 	}
 
 	want := model.User{
-		ID:                   id.(primitive.ObjectID),
+		ID:                   id,
 		Name:                 "test_user1",
 		Email:                "test_user1@test.com",
 		ResetPasswordExpires: time.Time{},
@@ -90,7 +84,7 @@ func TestUser(t *testing.T) {
 	}
 
 	want = model.User{
-		ID:                   id.(primitive.ObjectID),
+		ID:                   id,
 		Name:                 "test_user1",
 		Email:                "test_user1@test.com",
 		APIKey:               apiKey,
