@@ -191,7 +191,7 @@ Used to collect a Token for a registered User.
 
 ## Signup
 
-Used to col for a registered User.
+Used to registered a User.
 
 **URL** : `/api/v1/auth/signup`
 
