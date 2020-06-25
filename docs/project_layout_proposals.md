@@ -25,18 +25,20 @@ fupisha
 |       | store.go
 |       |
 |       └───mongodb
-|       |   | store.go
-|       |   | store_test.go
-|       |   | url.go
-|       |   | url_test.go
-|       |   | user.go
-|       |   | user_test.go
-|       |   | ...
+|       |   └───model
+|       |   |   | url.go
+|       |   |   | user.go
+|       |   |   |...
+|       |   |
+|       |   |   store.go
+|       |   |   store_test.go
+|       |   |   url.go
+|       |   |   url_test.go
+|       |   |   user.go
+|       |   |   user_test.go
+|       |   |   ...
 |       |
-|       └───model
-|           | url.go
-|           | user.go
-|           | ...
+|       | ...
 |
 |   config.go
 |   apikey.go
@@ -93,18 +95,31 @@ fupisha
 |       | store.go
 |       |
 |       └───mongodb
-|       |   | store.go
-|       |   | store_test.go
-|       |   | url.go
-|       |   | url_test.go
-|       |   | user.go
-|       |   | user_test.go
-|       |   | ...
+|       |   └───schema
+|       |   |   | url.go
+|       |   |   | user.go
+|       |   |   |...
+|       |   |
+|       |   |   store.go
+|       |   |   store_test.go
+|       |   |   url.go
+|       |   |   url_test.go
+|       |   |   user.go
+|       |   |   user_test.go
+|       |   |   ...
 |       |
-|       └───model
-|           | url.go
-|           | user.go
-|           | ...
+|       └───postgres
+|           └───schema
+|           |   | schema.sql
+|           |   |...
+|           |
+|           |   store.go
+|           |   store_test.go
+|           |   url.go
+|           |   url_test.go
+|           |   user.go
+|           |   user_test.go
+|           |   ...
 |
 |   config.go
 |   apikey.go
