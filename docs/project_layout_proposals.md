@@ -21,6 +21,11 @@ fupisha
 |   | project_layout.md
 |   | ...
 |
+└───templates
+|   |  verify.html
+|   |  reset.html
+|   |  ...
+|
 └───store
 |       | store.go
 |       |
@@ -90,6 +95,11 @@ fupisha
 |   | api.md
 |   | project_layout.md
 |   | ...
+|
+└───templates
+|   |  verify.html
+|   |  reset.html
+|   |  ...
 |
 └───store
 |       | store.go
