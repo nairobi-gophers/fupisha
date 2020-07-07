@@ -1,4 +1,4 @@
-//Package logging provides logging capability for mvuvi api.
+//Package logging provides logging capability for fupisha api.
 package logging
 
 import (
