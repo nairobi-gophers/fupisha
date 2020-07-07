@@ -221,7 +221,7 @@ Used to registered a User.
 
 ### Success Response
 
-**Code** : `201 OK`
+**Code** : `200 OK`
 
 **Content example** : `{}`
 
