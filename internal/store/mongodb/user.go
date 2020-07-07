@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/nairobi-gophers/fupisha/internal/pkg/v1/encoding"
+
+	"github.com/nairobi-gophers/fupisha/internal/encoding"
 	"github.com/nairobi-gophers/fupisha/internal/store/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -22,7 +23,7 @@ type userStore struct {
 //New creates a new user document
 func (s userStore) New(name, email, password string) (primitive.ObjectID, error) {
 
-	tkn := encoding.Generate()
+	tkn := encoding.GenUniqueID()
 
 	var insertedID primitive.ObjectID //zero value
 
