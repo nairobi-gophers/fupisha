@@ -17,7 +17,7 @@ import (
 
 //New configures application resources and routers.
 func New(enableCORS bool, cfg *config.Config) (*chi.Mux, error) {
-	logger := logging.NewLogger()
+	logger := logging.NewLogger(cfg)
 
 	store, err := cfg.GetStore()
 
