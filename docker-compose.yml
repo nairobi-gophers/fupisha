@@ -1,5 +1,42 @@
-version: "3"
+version: "3.7"
 services:
+  #Fupisha API server container
+  fupisha:
+    build:
+      context: .
+    container_name: api
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - 8080:8080
+    command:
+      [
+        "./wait-for-it.sh",
+        "mongodb:27017",
+        "--strict",
+        "--timeout=300",
+        "--",
+        "./main",
+        "start",
+      ]
+    volumes:
+      - ./fupisha:/fupisha
+    tty: true
+    networks:
+      - fupisha-api
+  # Redis (Cache) Container
+  redis:
+    image: redis:5.0.7
+    container_name: cache
+    ports:
+      - 6379:6379
+    command: redis-server --appendonly yes --requirepass Fup1sha
+    volumes:
+      - redis_data:/data
+    networks:
+      - fupisha-api
+  #Mongo Database Container
   mongodb:
     image: mongo:4.2.0
     container_name: mongodb
@@ -10,16 +47,18 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=fp_root
       - MONGO_INITDB_ROOT_PASSWORD=fp_s3cr37_!
     ports:
-      - "27017-27019:27017-27019" # use any default port from 27017 to 27019
+      - "27017:27017"
     volumes:
       - "./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro" # copy init-mongo.sh to /docker-entrypoint-initdb.d/ as a read only file./docker-entrypoint-initdb.d is a folder that is already created inside the mongo container used for initiating database, so we copy our script to that folder
       - "mongo_data:/data/db" # persist data on the container in a local folder named mongo-data. /data/db/ is a folder that already created inside the mongo container.
     networks:
-      - mongo_network
+      - fupisha-api
 
 volumes:
   mongo_data:
+  redis_data:
+  fupisha:
 
 networks:
-  mongo_network:
+  fupisha-api:
     driver: "bridge"
