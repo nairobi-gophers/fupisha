@@ -15,7 +15,7 @@ type Server struct {
 	*http.Server
 }
 
-//NewServer creates and configures an mvuvi API Server serving all application routes.
+//NewServer creates and configures an fupisha API Server serving all application routes.
 func NewServer() (*Server, error) {
 
 	cfg, err := config.New()
