@@ -35,8 +35,8 @@ ENV FUPISHA_HOME /go/src/fupisha
 # SMTP config
 ENV FUPISHA_SMTP_PORT=587
 ENV FUPISHA_SMTP_HOST=smtp.gmail.com
-ENV FUPISHA_SMTP_USER=ivvadmn@gmail.com
-ENV FUPISHA_SMTP_PASSWORD=zeswokzcorimzwqd
+ENV FUPISHA_SMTP_USER=smtp_username
+ENV FUPISHA_SMTP_PASSWORD=smtp_password
 ENV FUPISHA_SMTP_FROM_NAME=Fupisha
 ENV FUPISHA_SMTP_FROM_ADDRESS=no-reply@fupisha.io
 
