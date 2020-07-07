@@ -1,5 +1,15 @@
 package config
 
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/kelseyhightower/envconfig"
+	"github.com/nairobi-gophers/fupisha/internal/encoding"
+	"github.com/nairobi-gophers/fupisha/internal/logging"
+)
+
 //Config is a fupisha configuration struct
 type Config struct {
 	BaseURL     string `envconfig:"FUPISHA_BASE_URL"`
@@ -48,3 +58,18 @@ type Config struct {
 	}
 }
 
+//New returns an initialized config object ready for use
+func New() (*Config, error) {
+	cfg := Config{}
+	if err := envconfig.Process("", &cfg); err != nil {
+		return nil, fmt.Errorf("failed to process environment variables: %v", err)
+	}
+	cfg.BaseURL = strings.TrimSuffix(cfg.BaseURL, "/")
+
+	return &cfg, nil
+}
+
+//GenKey generates a  32 byte crypto-random unique key
+func GenKey(ctx context.Context) {
+	logging.FromContext(ctx).Infof("Key: %s", encoding.GenHexKey(32))
+}
