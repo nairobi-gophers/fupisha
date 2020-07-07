@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os/user"
 	"time"
 
 	"github.com/go-chi/chi/middleware"
+	"github.com/nairobi-gophers/fupisha/internal/config"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var (
@@ -24,16 +22,22 @@ type StructuredLogger struct {
 	Logger *logrus.Logger
 }
 
-//NewLogger creates and configures a new logrus Logger.
-func NewLogger() *logrus.Logger {
+// NewLogger creates and configures a new logrus Logger.
+func NewLogger(cfg *config.Config) *logrus.Logger {
 	Logger = logrus.New()
-	if viper.GetBool("MVUVI_TEXT_LOGGING") {
+
+	if cfg.TextLogging {
 		Logger.Formatter = &logrus.TextFormatter{
+			DisableTimestamp: true,
+		}
+	} else {
+		Logger.Formatter = &logrus.JSONFormatter{
 			DisableTimestamp: true,
 		}
 	}
 
-	level := viper.GetString("MVUVI_LOG_LEVEL")
+	level := cfg.LogLevel
+
 	if level == "" {
 		level = "error"
 	}
@@ -42,23 +46,6 @@ func NewLogger() *logrus.Logger {
 		log.Fatal(err)
 	}
 	Logger.Level = l
-
-	usr, err := user.Current()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	path := usr.HomeDir + "/.mvuvi/mvuvi.log"
-
-	Logger.SetOutput(&lumberjack.Logger{
-		Filename:   path,
-		MaxSize:    500, // megabytes
-		MaxBackups: 3,
-		MaxAge:     28,   //days
-		Compress:   true, // disabled by default
-	})
-
 	return Logger
 }
 
