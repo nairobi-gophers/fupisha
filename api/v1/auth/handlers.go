@@ -9,6 +9,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/nairobi-gophers/fupisha/internal/logging"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -31,7 +32,7 @@ func (body *signupRequest) Bind(r *http.Request) error {
 func (rs Resource) handleSignup(w http.ResponseWriter, r *http.Request) {
 
 	if err := checkAPI(r.Header.Get("Api")); err != nil {
-		logging.FromContext(r.Context()).Error(err)
+		log(r).WithField("APIVersion", r.Header.Get("Api")).Error(err)
 		render.Render(w, r, ErrUnsupportedAPIVersion(err))
 		return
 	}
@@ -39,7 +40,7 @@ func (rs Resource) handleSignup(w http.ResponseWriter, r *http.Request) {
 	body := signupRequest{}
 
 	if err := render.Bind(r, &body); err != nil {
-		logging.FromContext(r.Context()).Error(err)
+		log(r).Error(err)
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
@@ -52,13 +53,13 @@ func (rs Resource) handleSignup(w http.ResponseWriter, r *http.Request) {
 			//If its a unique key violation
 			for _, we := range e.WriteErrors {
 				if we.Code == 11000 {
-					logging.FromContext(r.Context()).Error(err)
+					log(r).WithField("email", body.Email).Error(err)
 					render.Render(w, r, ErrDuplicateField(ErrEmailTaken))
 					return
 				}
 			}
 		}
-		logging.FromContext(r.Context()).Error(err)
+		log(r).WithField("email", body.Email).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
@@ -75,4 +76,8 @@ func checkAPI(api string) error {
 		}
 	}
 	return nil
+}
+
+func log(r *http.Request) logrus.FieldLogger {
+	return logging.GetLogEntry(r)
 }
