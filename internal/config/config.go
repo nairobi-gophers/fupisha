@@ -1,7 +1,6 @@
 package config
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nairobi-gophers/fupisha/internal/encoding"
-	"github.com/nairobi-gophers/fupisha/internal/logging"
 	"github.com/nairobi-gophers/fupisha/internal/store"
 	"github.com/nairobi-gophers/fupisha/internal/store/mongodb"
 )
@@ -100,6 +98,6 @@ func New() (*Config, error) {
 }
 
 //GenKey generates a  32 byte crypto-random unique key
-func GenKey(ctx context.Context) {
-	logging.FromContext(ctx).Infof("Key: %s", encoding.GenHexKey(32))
+func GenKey() {
+	log.Printf("%s\n", encoding.GenHexKey(32))
 }
