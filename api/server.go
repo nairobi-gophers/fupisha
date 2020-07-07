@@ -16,9 +16,9 @@ type Server struct {
 }
 
 //NewServer creates and configures an mvuvi API Server serving all application routes.
-func NewServer(useEnvConfig bool) (*Server, error) {
+func NewServer() (*Server, error) {
 
-	cfg, err := config.New(useEnvConfig)
+	cfg, err := config.New()
 	if err != nil {
 		return nil, err
 	}
