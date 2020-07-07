@@ -1,7 +1,9 @@
 package encoding
 
 import (
+	"crypto/rand"
 	b64 "encoding/base64"
+	"encoding/hex"
 	"log"
 
 	"github.com/gofrs/uuid"
@@ -35,4 +37,15 @@ func GenUniqueID() uuid.UUID {
 		log.Fatalf("failed to generate id :%s", err)
 	}
 	return id
+}
+
+//GenHexKey generates a crypto-random key with byte length len and hex-encodes it to a string.
+func GenHexKey(len int) string {
+	bytes := make([]byte, len)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return hex.EncodeToString(bytes)
 }
