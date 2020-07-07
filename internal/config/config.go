@@ -2,12 +2,16 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nairobi-gophers/fupisha/internal/encoding"
 	"github.com/nairobi-gophers/fupisha/internal/logging"
+	"github.com/nairobi-gophers/fupisha/internal/store"
+	"github.com/nairobi-gophers/fupisha/internal/store/mongodb"
 )
 
 //Config is a fupisha configuration struct
@@ -56,6 +60,32 @@ type Config struct {
 			Database string `envconfig:"FUPISHA_STORE_MYSQL_DATABASE"`
 		}
 	}
+}
+
+//GetStore returns a connection to the relevant database as specified on the config
+func (cfg *Config) GetStore() (store.Store, error) {
+	switch cfg.Store.Type {
+	case "mongo":
+		var (
+			address  = cfg.Store.Mongo.Address
+			username = cfg.Store.Mongo.Username
+			password = cfg.Store.Mongo.Password
+			database = cfg.Store.Mongo.Database
+		)
+
+		if (address == "") || (username == "") || (database == "") || (password == "") {
+			err := errors.New("missing mongodb configuration variable")
+			log.Fatalf("config: %s", err.Error())
+		}
+		// address := fmt.Sprintf("%s:%s", host, port)
+		return mongodb.Connect(
+			address,
+			username,
+			password,
+			database,
+		)
+	}
+	return nil, fmt.Errorf("config: unknown store type: %s", cfg.Store.Type)
 }
 
 //New returns an initialized config object ready for use
