@@ -2,6 +2,7 @@ package encoding
 
 import (
 	b64 "encoding/base64"
+	"log"
 
 	"github.com/gofrs/uuid"
 )
@@ -25,4 +26,13 @@ func Decode(id string) (uuid.UUID, error) {
 	}
 
 	return decoded, nil
+}
+
+//GenUniqueID returns a random but unique id.
+func GenUniqueID() uuid.UUID {
+	id, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalf("failed to generate id :%s", err)
+	}
+	return id
 }
