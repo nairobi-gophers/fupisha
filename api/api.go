@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -17,24 +16,24 @@ import (
 )
 
 //New configures application resources and routers.
-func New(ctx context.Context, enableCORS bool, cfg *config.Config) (*chi.Mux, error) {
-	logger := logging.FromContext(ctx)
+func New(enableCORS bool, cfg *config.Config) (*chi.Mux, error) {
+	logger := logging.NewLogger()
 
 	store, err := cfg.GetStore()
+
 	if err != nil {
-		// logger.WithField("module", "config").Error(err)
-		logger.Errorf("module: %s config error: %v", err)
+		logger.WithField("module", "config").Error(err)
 		return nil, err
 	}
 
-	authResource := auth.NewResource(store, mailer, cfg)
+	authResource := auth.NewResource(store, cfg)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Timeout(15 * time.Second))
-	r.Use(logger)
+	r.Use(logging.NewStructuredLogger(logger))
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	//Use CORS middleware if client is not served by this api, e.g. from other domain
