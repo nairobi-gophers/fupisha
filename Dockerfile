@@ -98,4 +98,4 @@ USER fupisha
 EXPOSE 8080
 
 # Command to run the executable
-CMD ["./fupisha","start"] 
+CMD ["./main","start"] 
