@@ -29,7 +29,7 @@ func (body *signupRequest) Bind(r *http.Request) error {
 		validation.Field(&body.Password, validation.Required, validation.Length(8, 32), is.Alphanumeric))
 }
 
-func (rs Resource) handleSignup(w http.ResponseWriter, r *http.Request) {
+func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 
 	if err := checkAPI(r.Header.Get("Api")); err != nil {
 		log(r).WithField("APIVersion", r.Header.Get("Api")).Error(err)
