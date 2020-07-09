@@ -64,6 +64,7 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	render.Status(r, http.StatusCreated)
 	render.Respond(w, r, http.NoBody)
 }
 
