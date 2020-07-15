@@ -25,6 +25,12 @@ var ErrEmailTaken = errors.New("that email is taken")
 //ErrLoginToken an invalid or expired token
 var ErrLoginToken = errors.New("invalid or expired login token")
 
+//ErrAPIUnsupported an unsupported api version
+var ErrAPIUnsupported = errors.New("unsupported api version")
+
+//ErrMissingAPIVersion a missing api version header with the version text.
+var ErrMissingAPIVersion = errors.New("missing api version header")
+
 // ErrResponse renderer type for handling all sorts of errors.
 type ErrResponse struct {
 	Err            error `json:"-"` // low-level runtime error
