@@ -23,7 +23,13 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
-	api, err := New(true, cfg)
+	store, err := cfg.GetStore()
+
+	if err != nil {
+		return nil, err
+	}
+
+	api, err := New(true, cfg, store)
 	if err != nil {
 		return nil, err
 	}
