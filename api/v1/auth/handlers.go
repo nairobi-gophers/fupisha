@@ -11,8 +11,6 @@ import (
 	"github.com/nairobi-gophers/fupisha/internal/logging"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type signupRequest struct {
@@ -32,12 +30,6 @@ func (body *signupRequest) Bind(r *http.Request) error {
 
 //HandleSignup signup handler func for handling requests for new accounts.
 func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
-
-	// if err := checkAPI(r.Header.Get("Api")); err != nil {
-	// 	log(r).WithField("APIVersion", r.Header.Get("Api")).Error(err)
-	// 	render.Render(w, r, ErrUnsupportedAPIVersion(err))
-	// 	return
-	// }
 
 	body := signupRequest{}
 
@@ -68,17 +60,6 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 
 	render.Status(r, http.StatusCreated)
 	render.Respond(w, r, http.NoBody)
-}
-
-func checkAPI(api string) error {
-	//if  API version is "" means use current version of the service
-	if len(api) > 0 {
-		if apiVersion != api {
-			return status.Errorf(codes.Unimplemented,
-				"unsupported API version: service implements API version '%s', but asked for '%s'", apiVersion, api)
-		}
-	}
-	return nil
 }
 
 func log(r *http.Request) logrus.FieldLogger {
