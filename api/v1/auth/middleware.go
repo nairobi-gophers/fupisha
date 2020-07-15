@@ -9,6 +9,11 @@ import (
 	"github.com/nairobi-gophers/fupisha/internal/auth"
 )
 
+const (
+	//version of api provided by the server
+	apiVersion = "v1"
+)
+
 //Verifier http middleware will verify a jwt string from a http request.
 func (rs *Resource) Verifier(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -39,5 +44,31 @@ func (rs *Resource) Verifier(next http.Handler) http.Handler {
 			render.Render(w, r, ErrUnauthorized(ErrMissingToken))
 			return
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+//CheckAPI http middleware will verify the api version from a http request.
+func CheckAPI(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header["Api"] != nil {
+			api := r.Header.Get("Api")
+			if len(api) > 0 {
+				if apiVersion != api {
+					log(r).Error(ErrAPIUnsupported)
+					render.Render(w, r, ErrUnsupportedAPIVersion(ErrAPIUnsupported))
+					return
+				}
+			} else {
+				log(r).Error(ErrAPIUnsupported)
+				render.Render(w, r, ErrUnsupportedAPIVersion(ErrAPIUnsupported))
+				return
+			}
+		} else {
+			log(r).Error(ErrMissingAPIVersion)
+			render.Render(w, r, ErrUnsupportedAPIVersion(ErrMissingAPIVersion))
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }
