@@ -24,18 +24,20 @@ type signupRequest struct {
 func (body *signupRequest) Bind(r *http.Request) error {
 	body.Email = strings.TrimSpace(body.Email)
 	body.Password = strings.TrimSpace(body.Password)
+	body.Name = strings.TrimSpace(body.Name)
 
-	return validation.ValidateStruct(body, validation.Field(&body.Email, validation.Required, is.Email),
+	return validation.ValidateStruct(body, validation.Field(&body.Email, validation.Required, is.Email), validation.Field(&body.Name, validation.Required, validation.Length(3, 32), is.ASCII),
 		validation.Field(&body.Password, validation.Required, validation.Length(8, 32), is.Alphanumeric))
 }
 
+//HandleSignup signup handler func for handling requests for new accounts.
 func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 
-	if err := checkAPI(r.Header.Get("Api")); err != nil {
-		log(r).WithField("APIVersion", r.Header.Get("Api")).Error(err)
-		render.Render(w, r, ErrUnsupportedAPIVersion(err))
-		return
-	}
+	// if err := checkAPI(r.Header.Get("Api")); err != nil {
+	// 	log(r).WithField("APIVersion", r.Header.Get("Api")).Error(err)
+	// 	render.Render(w, r, ErrUnsupportedAPIVersion(err))
+	// 	return
+	// }
 
 	body := signupRequest{}
 
