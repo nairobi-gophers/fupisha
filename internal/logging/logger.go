@@ -113,8 +113,10 @@ func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {
 
 // GetLogEntry return the request scoped logrus.FieldLogger.
 func GetLogEntry(r *http.Request) logrus.FieldLogger {
-	entry := middleware.GetLogEntry(r).(*StructuredLoggerEntry)
-	return entry.Logger
+	if entry, ok := middleware.GetLogEntry(r).(*StructuredLoggerEntry); ok {
+		return entry.Logger
+	}
+	return nil
 }
 
 //LogEntrySetField adds a field to the request scoped logrus.FieldLogger.
