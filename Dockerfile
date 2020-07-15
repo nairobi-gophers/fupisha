@@ -15,8 +15,6 @@ COPY . .
 # -w = disable DWARF generation
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o main ./cmd/
 
-# # Build the Go app
-# RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o fupisha ./cmd/
 
 FROM aquasec/trivy:0.4.4 as trivy
 
@@ -60,11 +58,8 @@ ENV FUPISHA_TITLE=Fupisha
 ENV FUPISHA_LOG_LEVEL=info
 ENV FUPISHA_TEXT_LOGGING=false
 
-
-
 RUN apk update && apk --no-cache add ca-certificates
 RUN apk --no-cache add  bash
-
 
 COPY --from=trivy result secure
 #Copy the email templates from the previous stage
@@ -76,8 +71,6 @@ COPY --from=base /api/main .
 #Copy the wait script file from the previous stage
 COPY --from=base /api/wait-for-it.sh .
 
-# # Create a group and user
-# RUN addgroup $FUPISHA_GROUP && adduser -D -G $FUPISHA_USER $FUPISHA_GROUP
 
 # Create a new group and user, recursively change directory ownership, then give permission to run script
 RUN addgroup fupisha && adduser -D -G fupisha fupisha \
@@ -85,10 +78,6 @@ RUN addgroup fupisha && adduser -D -G fupisha fupisha \
   chmod +x ./wait-for-it.sh && \
   chmod +x ./main
 
-# RUN chown -R fupisha:fupisha ./wait-for-it.sh && \
-#   chown -R chown -R $FUPISHA_USER:$FUPISHA_USER ./fupisha && \
-#   chmod +x ./wait-for-it.sh && \
-#   chmod +x ./fupisha
 
 # Tell docker that all future commands should run as the your user
 USER fupisha
