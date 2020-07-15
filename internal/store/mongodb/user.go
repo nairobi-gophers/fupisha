@@ -66,6 +66,7 @@ func (s userStore) Get(id string) (model.User, error) {
 	return user, nil
 }
 
+//GetByEmail retrieve an existing user with the given email
 func (s userStore) GetByEmail(email string) (model.User, error) {
 	user := model.User{}
 
@@ -76,6 +77,7 @@ func (s userStore) GetByEmail(email string) (model.User, error) {
 	return user, nil
 }
 
+//SetAPIKey sets the api key for the given user id.
 func (s userStore) SetAPIKey(id string, key uuid.UUID) (model.User, error) {
 
 	docID, err := primitive.ObjectIDFromHex(id)
