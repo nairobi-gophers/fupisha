@@ -1,0 +1,30 @@
+version: "3.7"
+services:
+  mongodb:
+    image: mongo:4.2.0
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=fupisha
+      - MONGO_INITDB_USERNAME=fupisha
+      - MONGO_INITDB_PASSWORD=fupisha
+      - MONGO_INITDB_ROOT_USERNAME=fp_root
+      - MONGO_INITDB_ROOT_PASSWORD=fp_s3cr37_!
+    ports:
+      - "27017:27017"
+    volumes:
+      - "./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro" # copy init-mongo.sh to /docker-entrypoint-initdb.d/ as a read only file./docker-entrypoint-initdb.d is a folder that is already created inside the mongo container used for initiating database, so we copy our script to that folder
+    networks:
+      - test
+  # Redis (Cache) Container
+  redis:
+    image: redis:5.0.7
+    container_name: cache
+    ports:
+      - 6379:6379
+    command: redis-server --appendonly yes --requirepass Fup1sha
+    networks:
+      - test
+
+networks:
+  test:
+    driver: "bridge"
