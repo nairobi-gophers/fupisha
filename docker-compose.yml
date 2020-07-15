@@ -25,6 +25,7 @@ services:
     tty: true
     networks:
       - fupisha-api
+
   # Redis (Cache) Container
   redis:
     image: redis:5.0.7
