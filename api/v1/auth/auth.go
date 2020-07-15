@@ -5,10 +5,7 @@ import (
 	"github.com/nairobi-gophers/fupisha/internal/store"
 )
 
-const (
-	//version of api provided by the server
-	apiVersion = "v1"
-)
+
 
 //Resource defines dependencies for auth handlers.
 type Resource struct {
