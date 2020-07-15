@@ -13,18 +13,12 @@ import (
 	"github.com/nairobi-gophers/fupisha/api/v1/auth"
 	"github.com/nairobi-gophers/fupisha/internal/config"
 	"github.com/nairobi-gophers/fupisha/internal/logging"
+	"github.com/nairobi-gophers/fupisha/internal/store"
 )
 
 //New configures application resources and routers.
-func New(enableCORS bool, cfg *config.Config) (*chi.Mux, error) {
+func New(enableCORS bool, cfg *config.Config, store store.Store) (*chi.Mux, error) {
 	logger := logging.NewLogger(cfg)
-
-	store, err := cfg.GetStore()
-
-	if err != nil {
-		logger.WithField("module", "config").Error(err)
-		return nil, err
-	}
 
 	authResource := auth.NewResource(store, cfg)
 
@@ -34,6 +28,7 @@ func New(enableCORS bool, cfg *config.Config) (*chi.Mux, error) {
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Timeout(15 * time.Second))
 	r.Use(logging.NewStructuredLogger(logger))
+	r.Use(auth.CheckAPI)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	//Use CORS middleware if client is not served by this api, e.g. from other domain
