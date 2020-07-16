@@ -6,5 +6,6 @@ import "github.com/go-chi/chi"
 func (rs *Resource) Router() *chi.Mux {
 	r := chi.NewRouter()
 	r.Post("/signup", rs.HandleSignup)
+	r.Post("/login", rs.HandleLogin)
 	return r
 }
