@@ -14,47 +14,77 @@ import (
 
 //Config is a fupisha configuration struct
 type Config struct {
-	BaseURL     string `envconfig:"FUPISHA_BASE_URL"`
-	Title       string `envconfig:"FUPISHA_TITLE"`
-	TextLogging bool   `envconfig:"FUPISHA_TEXT_LOGGING"`
-	LogLevel    string `envconfig:"FUPISHA_LOG_LEVEL"`
-	JWT         struct {
-		Secret      string `envconfig:"FUPISHA_JWT_SECRET"`
+	//BaseURL fupisha's fully qualified domain name.
+	BaseURL string `envconfig:"FUPISHA_BASE_URL"`
+	//Title name of the application e.g. fupisha.
+	Title string `envconfig:"FUPISHA_TITLE"`
+	//TextLogging write api requests to file.
+	TextLogging bool `envconfig:"FUPISHA_TEXT_LOGGING"`
+	//LogLevel category of the log.
+	LogLevel string `envconfig:"FUPISHA_LOG_LEVEL"`
+	//ParamLength length of the shorten url param (https://base_url/{param}) e.g https://fupisha.io/kKIoqRF
+	ParamLength int `envconfig:"FUPISHA_PARAM_LENGTH"`
+	//JWT json web token payload
+	JWT struct {
+		//Secret secret jwt signing key.
+		Secret string `envconfig:"FUPISHA_JWT_SECRET"`
+		//ExpireDelta duration after which the token is rendered invalid.
 		ExpireDelta string `envconfig:"FUPISHA_JWT_EXPIRE_DELTA"`
 	}
-
+	//SMTP third party email provider smtp configuration fields.
 	SMTP struct {
-		Port        int    `envconfig:"FUPISHA_SMTP_PORT"`
-		Host        string `envconfig:"FUPISHA_SMTP_HOST"`
-		Username    string `envconfig:"FUPISHA_SMTP_USERNAME"`
-		Password    string `envconfig:"FUPISHA_SMTP_PASSWORD"`
-		FromName    string `envconfig:"FUPISHA_SMTP_FROM_NAME"`
+		//Port smtp port
+		Port int `envconfig:"FUPISHA_SMTP_PORT"`
+		//Host smtp host e.g. smtp.gmail.com
+		Host string `envconfig:"FUPISHA_SMTP_HOST"`
+		//Username smtp username.
+		Username string `envconfig:"FUPISHA_SMTP_USERNAME"`
+		//Password smtp password.
+		Password string `envconfig:"FUPISHA_SMTP_PASSWORD"`
+		//FromName email sender's name.
+		FromName string `envconfig:"FUPISHA_SMTP_FROM_NAME"`
+		//FromAddress email sender's email address
 		FromAddress string `envconfig:"FUPISHA_SMTP_FROM_ADDRESS"`
 	}
-
+	//Store fupisha storage configuration object.
 	Store struct {
+		//Type the type of database. e.g. mongo
 		Type string `envconfig:"FUPISHA_STORE_TYPE"`
-
+		//PostgreSQL postgresql database connection parameters.
 		PostgreSQL struct {
-			Address     string `envconfig:"FUPISHA_STORE_POSTGRESQL_ADDRESS"`
-			Username    string `envconfig:"FUPISHA_STORE_POSTGRESQL_USERNAME"`
-			Password    string `envconfig:"FUPISHA_STORE_POSTGRESQL_PASSWORD"`
-			Database    string `envconfig:"FUPISHA_STORE_POSTGRESQL_DATABASE"`
-			SSLMode     string `envconfig:"FUPISHA_STORE_POSTGRESQL_SSLMODE"`
+			//Address postgresql host and port. e.g. localhost:5432
+			Address string `envconfig:"FUPISHA_STORE_POSTGRESQL_ADDRESS"`
+			//Username postgresql user.
+			Username string `envconfig:"FUPISHA_STORE_POSTGRESQL_USERNAME"`
+			//Password postgresql password associated with the user.
+			Password string `envconfig:"FUPISHA_STORE_POSTGRESQL_PASSWORD"`
+			//Database postgresql database name.
+			Database string `envconfig:"FUPISHA_STORE_POSTGRESQL_DATABASE"`
+			//SSLMode if enabled postgresql will encrypt the communication to and from.
+			SSLMode string `envconfig:"FUPISHA_STORE_POSTGRESQL_SSLMODE"`
+			//SSLRootCert requires if SSLMode is enabled.
 			SSLRootCert string `envconfig:"FUPISHA_STORE_POSTGRESQL_SSLROOTCERT"`
 		}
-
+		//Mongo mongo database connection parameters.
 		Mongo struct {
-			Address  string `envconfig:"FUPISHA_STORE_MONGO_ADDRESS"`
+			//Address mongo host and port. e.g localhost:27017
+			Address string `envconfig:"FUPISHA_STORE_MONGO_ADDRESS"`
+			//Username mongo user.
 			Username string `envconfig:"FUPISHA_STORE_MONGO_USERNAME"`
+			//Password mongo user's password.
 			Password string `envconfig:"FUPISHA_STORE_MONGO_PASSWORD"`
+			//Database mongo database name.
 			Database string `envconfig:"FUPISHA_STORE_MONGO_DATABASE"`
 		}
-
+		//MySQL mysql database connection parameters.
 		MySQL struct {
-			Address  string `envconfig:"FUPISHA_STORE_MYSQL_ADDRESS"`
+			//Address mysql host and port. e.g. localhost:3306
+			Address string `envconfig:"FUPISHA_STORE_MYSQL_ADDRESS"`
+			//Username mysql user.
 			Username string `envconfig:"FUPISHA_STORE_MYSQL_USERNAME"`
+			//Password mysql user's passsword.
 			Password string `envconfig:"FUPISHA_STORE_MYSQL_PASSWORD"`
+			//Database mysql database name.
 			Database string `envconfig:"FUPISHA_STORE_MYSQL_DATABASE"`
 		}
 	}
