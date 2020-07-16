@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/render"
-	"github.com/nairobi-gophers/fupisha/internal/auth"
+	"github.com/nairobi-gophers/fupisha/internal/provider"
 )
 
 const (
@@ -27,7 +27,7 @@ func (rs *Resource) Verifier(next http.Handler) http.Handler {
 			token := authHeader[7:]
 
 			secret := hex.EncodeToString([]byte(rs.Config.JWT.Secret))
-			service, err := auth.NewService(secret)
+			service, err := provider.NewJWTService(secret)
 			if err != nil {
 				log(r).WithField("secret", secret).Error(err)
 				render.Render(w, r, ErrInternalServerError)
