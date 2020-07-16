@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/gofrs/uuid"
+	nanoid "github.com/matoous/go-nanoid"
 )
 
 //Encode encodes the uuid to a base64 string that is url-safe.
@@ -28,6 +29,15 @@ func Decode(id string) (uuid.UUID, error) {
 	}
 
 	return decoded, nil
+}
+
+//GenUniqueParam returns a random param but unique key.
+func GenUniqueParam(alphanumeric string, len int) string {
+	param, err := nanoid.Generate(alphanumeric, len)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return param
 }
 
 //GenUniqueID returns a random but unique id.
