@@ -101,4 +101,14 @@ func TestUser(t *testing.T) {
 	if !reflect.DeepEqual(user, want) {
 		t.Fatalf("got user %+v want %+v", user, want)
 	}
+
+	got, err := s.Users().GetByEmail("test_user1@test.com")
+	if err != nil {
+		t.Fatalf("failed to get user by name: %s", err)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got user %v want %v", got, want)
+	}
+
 }
