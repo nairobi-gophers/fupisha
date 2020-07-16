@@ -13,7 +13,7 @@ func TestEncodeDecode(t *testing.T) {
 
 	secret := encoding.GenHexKey(32)
 
-	s, err := NewService(secret)
+	s, err := NewJWTService(secret)
 	if err != nil {
 		t.Fatalf("failed to create a new service: %s", err)
 	}
@@ -40,7 +40,7 @@ func TestEncodeDecode(t *testing.T) {
 
 	badSecret := strings.Repeat("1", 64)
 
-	s, err = NewService(badSecret)
+	s, err = NewJWTService(badSecret)
 	if err != nil {
 		t.Fatalf("failed to create a new service: %s", err)
 	}
