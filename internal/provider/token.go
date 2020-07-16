@@ -10,8 +10,8 @@ import (
 	"github.com/nairobi-gophers/fupisha/internal/config"
 )
 
-//Service defines an implementation of our JWT authentication service.
-type Service interface {
+//JWTService defines an implementation of our JWT authentication service.
+type JWTService interface {
 	Encode(uid string) (token string, err error)
 	Decode(token string) (userID string, issuedAt time.Time, err error)
 }
@@ -28,8 +28,8 @@ type Claims struct {
 	UserID string
 }
 
-//NewService configures and returns a JWT authentication instance.
-func NewService(secret string) (Service, error) {
+//NewJWTService configures and returns a JWT authentication instance.
+func NewJWTService(secret string) (JWTService, error) {
 	secretBytes, err := hex.DecodeString(secret)
 	if err != nil {
 		return nil, fmt.Errorf("jwt: failed to decode jwt secret from string %s: %w", secret, err)
