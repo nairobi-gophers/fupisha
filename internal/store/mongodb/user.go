@@ -70,7 +70,7 @@ func (s userStore) Get(id string) (model.User, error) {
 func (s userStore) GetByEmail(email string) (model.User, error) {
 	user := model.User{}
 
-	if err := s.db.Collection("users").FindOne(s.ctx, bson.M{"Email": email}).Decode(&user); err != nil {
+	if err := s.db.Collection("users").FindOne(s.ctx, bson.M{"email": email}).Decode(&user); err != nil {
 		return user, err
 	}
 
