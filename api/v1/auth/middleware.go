@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"encoding/hex"
 	"net/http"
 	"strings"
@@ -9,9 +10,16 @@ import (
 	"github.com/nairobi-gophers/fupisha/internal/provider"
 )
 
+//The key type is unexported to prevent collisions with context keys defined in
+// other packages.
+type key int
+
 const (
 	//version of api provided by the server
 	apiVersion = "v1"
+	//userIDKey for propagating the userID down the request chain.
+	userIDKey key = iota //use of named type to stop golint from complaining.
+	//https://blog.golang.org/context#TOC_3.2.
 )
 
 //Verifier http middleware will verify a jwt string from a http request.
@@ -33,18 +41,22 @@ func (rs *Resource) Verifier(next http.Handler) http.Handler {
 				render.Render(w, r, ErrInternalServerError)
 				return
 			}
-			_, _, err = service.Decode(token)
+			uid, _, err := service.Decode(token)
 			if err != nil {
 				log(r).WithField("token", token).Error(err)
 				render.Render(w, r, ErrUnauthorized(ErrLoginToken))
 				return
 			}
+
+			ctx := context.WithValue(r.Context(), userIDKey, uid)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+
 		} else {
 			log(r).Error(ErrMissingToken)
 			render.Render(w, r, ErrUnauthorized(ErrMissingToken))
 			return
 		}
-		next.ServeHTTP(w, r)
 	})
 }
 
