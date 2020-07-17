@@ -44,10 +44,11 @@ func NewJWTService(secret string) (JWTService, error) {
 
 // Encode a claim into a JWT
 func (s *service) Encode(uid string) (string, error) {
+
 	// Create the Claims
 	c := Claims{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * time.Duration(1)).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * time.Duration(s.cfg.JWT.ExpireDelta)).Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    "fupisha",
 		},
