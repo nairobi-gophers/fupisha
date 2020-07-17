@@ -51,7 +51,7 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	link := shortenURL(body.URL, rs.Config.BaseURL, rs.Config.ParamLength)
+	link := Shorten(body.URL, rs.Config.BaseURL, rs.Config.ParamLength)
 
 	//Insert the shortened url in the database
 	_, err = rs.Store.Urls().New(userID, body.URL, link)
@@ -70,7 +70,8 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, &resBody)
 }
 
-func shortenURL(originalURL, baseURL string, len int) string {
+//Shorten shortens a long url string
+func Shorten(originalURL, baseURL string, len int) string {
 	if !strings.HasSuffix(baseURL, "/") {
 		baseURL += "/"
 	}
