@@ -29,7 +29,7 @@ type Config struct {
 		//Secret secret jwt signing key.
 		Secret string `envconfig:"FUPISHA_JWT_SECRET"`
 		//ExpireDelta duration after which the token is rendered invalid.
-		ExpireDelta string `envconfig:"FUPISHA_JWT_EXPIRE_DELTA"`
+		ExpireDelta int `envconfig:"FUPISHA_JWT_EXPIRE_DELTA"`
 	}
 	//SMTP third party email provider smtp configuration fields.
 	SMTP struct {
