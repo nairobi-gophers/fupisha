@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/render"
+	"github.com/nairobi-gophers/fupisha/internal/config"
 	"github.com/nairobi-gophers/fupisha/internal/provider"
 )
 
@@ -23,41 +24,44 @@ const (
 )
 
 //Verifier http middleware will verify a jwt string from a http request.
-func (rs *Resource) Verifier(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header["Authorization"] != nil {
-			authHeader := r.Header.Get("Authorization")
-			if len(authHeader) < 7 || strings.ToUpper(authHeader[:6]) != "BEARER" {
-				log(r).Error(ErrLoginToken)
-				render.Render(w, r, ErrUnauthorized(ErrLoginToken))
+func Verifier(cfg *config.Config) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		hfn := func(w http.ResponseWriter, r *http.Request) {
+			if r.Header["Authorization"] != nil {
+				authHeader := r.Header.Get("Authorization")
+				if len(authHeader) < 7 || strings.ToUpper(authHeader[:6]) != "BEARER" {
+					log(r).Error(ErrLoginToken)
+					render.Render(w, r, ErrUnauthorized(ErrLoginToken))
+					return
+				}
+				token := authHeader[7:]
+
+				secret := hex.EncodeToString([]byte(cfg.JWT.Secret))
+				service, err := provider.NewJWTService(secret)
+				if err != nil {
+					log(r).WithField("secret", secret).Error(err)
+					render.Render(w, r, ErrInternalServerError)
+					return
+				}
+				uid, _, err := service.Decode(token)
+				if err != nil {
+					log(r).WithField("token", token).Error(err)
+					render.Render(w, r, ErrUnauthorized(ErrLoginToken))
+					return
+				}
+
+				ctx := context.WithValue(r.Context(), userIDKey, uid)
+
+				next.ServeHTTP(w, r.WithContext(ctx))
+
+			} else {
+				log(r).Error(ErrMissingToken)
+				render.Render(w, r, ErrUnauthorized(ErrMissingToken))
 				return
 			}
-			token := authHeader[7:]
-
-			secret := hex.EncodeToString([]byte(rs.Config.JWT.Secret))
-			service, err := provider.NewJWTService(secret)
-			if err != nil {
-				log(r).WithField("secret", secret).Error(err)
-				render.Render(w, r, ErrInternalServerError)
-				return
-			}
-			uid, _, err := service.Decode(token)
-			if err != nil {
-				log(r).WithField("token", token).Error(err)
-				render.Render(w, r, ErrUnauthorized(ErrLoginToken))
-				return
-			}
-
-			ctx := context.WithValue(r.Context(), userIDKey, uid)
-
-			next.ServeHTTP(w, r.WithContext(ctx))
-
-		} else {
-			log(r).Error(ErrMissingToken)
-			render.Render(w, r, ErrUnauthorized(ErrMissingToken))
-			return
 		}
-	})
+		return http.HandlerFunc(hfn)
+	}
 }
 
 //CheckAPI http middleware will verify the api version from a http request.
