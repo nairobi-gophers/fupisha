@@ -2,6 +2,8 @@ package mongodb
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -21,14 +23,17 @@ type userStore struct {
 }
 
 //New creates a new user document
-func (s userStore) New(name, email, password string) (primitive.ObjectID, error) {
+func (s userStore) New(name, email, password string) (string, error) {
 
 	tkn := encoding.GenUniqueID()
 
-	var insertedID primitive.ObjectID //zero value
+	fmt.Println("TOKEN", tkn)
+	id := primitive.NewObjectID()
+
+	var insertedID string //zero value
 
 	user := model.User{
-		ID:                  primitive.NewObjectID(),
+		ID:                  id.Hex(),
 		Name:                name,
 		Email:               email,
 		Password:            password,
@@ -46,7 +51,15 @@ func (s userStore) New(name, email, password string) (primitive.ObjectID, error)
 		return insertedID, err
 	}
 
-	return result.InsertedID.(primitive.ObjectID), nil
+	resultID, ok := result.InsertedID.(string)
+
+	if !ok {
+		return insertedID, errors.New("invalid object id")
+	}
+
+	insertedID = resultID
+
+	return insertedID, nil
 }
 
 //Get finds a user by id
@@ -54,12 +67,12 @@ func (s userStore) Get(id string) (model.User, error) {
 
 	user := model.User{}
 
-	docID, err := primitive.ObjectIDFromHex(id)
+	_, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return user, err
 	}
 
-	if err := s.db.Collection("users").FindOne(s.ctx, bson.M{"_id": docID}).Decode(&user); err != nil {
+	if err := s.db.Collection("users").FindOne(s.ctx, bson.M{"_id": id}).Decode(&user); err != nil {
 		return user, err
 	}
 
@@ -78,16 +91,16 @@ func (s userStore) GetByEmail(email string) (model.User, error) {
 }
 
 //SetAPIKey sets the api key for the given user id.
-func (s userStore) SetAPIKey(id string, key uuid.UUID) (model.User, error) {
+func (s userStore) SetAPIKey(id string, key uuid.UUID) error {
 
-	docID, err := primitive.ObjectIDFromHex(id)
+	_, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return model.User{}, err
+		return err
 	}
 
-	filter := bson.M{"_id": docID}
+	filter := bson.M{"_id": id}
 	update := bson.M{
-		"$set": model.User{APIKey: key},
+		"$set": bson.M{"apiKey": key},
 	}
 
 	upsert := true
@@ -100,11 +113,12 @@ func (s userStore) SetAPIKey(id string, key uuid.UUID) (model.User, error) {
 	result := s.db.Collection("users").FindOneAndUpdate(s.ctx, filter, update, &opt)
 
 	if result.Err() != nil {
-		return model.User{}, result.Err()
+		return result.Err()
 	}
 
-	doc := model.User{}
-	decodeErr := result.Decode(&doc)
+	// doc := model.User{}
+	// decodeErr := result.Decode(&doc)
 
-	return doc, decodeErr
+	// return doc, decodeErr
+	return nil
 }
