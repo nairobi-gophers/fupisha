@@ -32,9 +32,9 @@ func TestUser(t *testing.T) {
 	}
 
 	//convert the ObjectID to string "5d0575344d9f7ff15e989174"
-	uid := id.Hex()
+	// uid := id.Hex()
 
-	user, err := s.Users().Get(uid)
+	user, err := s.Users().Get(id)
 
 	if err != nil {
 		t.Fatalf("failed to get user by id: %s", err)
@@ -78,7 +78,7 @@ func TestUser(t *testing.T) {
 
 	apiKey, _ := uuid.FromString("5bcd34d1-6bc2-464e-b0ab-6ca76f3c6f1b")
 
-	user, err = s.Users().SetAPIKey(uid, apiKey)
+	err = s.Users().SetAPIKey(id, apiKey)
 	if err != nil {
 		t.Fatalf("failed to set api key: %s", err)
 	}
@@ -98,11 +98,16 @@ func TestUser(t *testing.T) {
 		UpdatedAt:            time.Time{},
 	}
 
-	if !reflect.DeepEqual(user, want) {
-		t.Fatalf("got user %+v want %+v", user, want)
+	got, err := s.Users().Get(id)
+	if err != nil {
+		t.Fatalf("failed to get user by id: %s", err)
 	}
 
-	got, err := s.Users().GetByEmail("test_user1@test.com")
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got user %+v want %+v", got, want)
+	}
+
+	got, err = s.Users().GetByEmail("test_user1@test.com")
 	if err != nil {
 		t.Fatalf("failed to get user by name: %s", err)
 	}
