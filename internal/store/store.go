@@ -23,6 +23,6 @@ type UserStore interface {
 
 //URLStore is a url data store interface.
 type URLStore interface {
-	New(ctx context.Context, userID, originalURL, shortenedURL string) (string, error)
+	New(ctx context.Context, userID, originalURL, shortenedURL string) (model.URL, error)
 	Get(ctx context.Context, id string) (model.URL, error)
 }
