@@ -1,6 +1,7 @@
 package mongodb
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -13,19 +14,21 @@ func TestUser(t *testing.T) {
 	s, teardown := testConn(t)
 	defer teardown("users")
 
-	id, err := s.Users().New("test_user1", "test_user1@test.com", "test_password1")
+	ctx := context.Background()
+
+	id, err := s.Users().New(ctx, "test_user1", "test_user1@test.com", "test_password1")
 
 	if err != nil {
 		t.Fatalf("failed to create test_user1: %s", err)
 	}
 
-	_, err = s.Users().New("test_user2", "test_user1@test.com", "test_password2")
+	_, err = s.Users().New(ctx, "test_user2", "test_user1@test.com", "test_password2")
 
 	if err == nil {
 		t.Fatalf("no error on creating account with an existing email")
 	}
 
-	_, err = s.Users().New("test_user3", "test_user3@test.com", "test_password3")
+	_, err = s.Users().New(ctx, "test_user3", "test_user3@test.com", "test_password3")
 
 	if err != nil {
 		t.Fatalf("failed to create test_user3: %s", err)
@@ -34,7 +37,7 @@ func TestUser(t *testing.T) {
 	//convert the ObjectID to string "5d0575344d9f7ff15e989174"
 	// uid := id.Hex()
 
-	user, err := s.Users().Get(id)
+	user, err := s.Users().Get(ctx, id)
 
 	if err != nil {
 		t.Fatalf("failed to get user by id: %s", err)
@@ -78,7 +81,7 @@ func TestUser(t *testing.T) {
 
 	apiKey, _ := uuid.FromString("5bcd34d1-6bc2-464e-b0ab-6ca76f3c6f1b")
 
-	err = s.Users().SetAPIKey(id, apiKey)
+	err = s.Users().SetAPIKey(ctx, id, apiKey)
 	if err != nil {
 		t.Fatalf("failed to set api key: %s", err)
 	}
@@ -98,7 +101,7 @@ func TestUser(t *testing.T) {
 		UpdatedAt:            time.Time{},
 	}
 
-	got, err := s.Users().Get(id)
+	got, err := s.Users().Get(ctx, id)
 	if err != nil {
 		t.Fatalf("failed to get user by id: %s", err)
 	}
@@ -107,7 +110,7 @@ func TestUser(t *testing.T) {
 		t.Fatalf("got user %+v want %+v", got, want)
 	}
 
-	got, err = s.Users().GetByEmail("test_user1@test.com")
+	got, err = s.Users().GetByEmail(ctx, "test_user1@test.com")
 	if err != nil {
 		t.Fatalf("failed to get user by name: %s", err)
 	}
