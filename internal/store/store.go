@@ -15,7 +15,7 @@ type Store interface {
 
 //UserStore is a user data store interface.
 type UserStore interface {
-	New(ctx context.Context, name, email, password string) (string, error)
+	New(ctx context.Context, name, email, password string) (model.User, error)
 	Get(ctx context.Context, id string) (model.User, error)
 	GetByEmail(ctx context.Context, email string) (model.User, error)
 	SetAPIKey(ctx context.Context, id string, key uuid.UUID) error
