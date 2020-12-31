@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/jmoiron/sqlx"
@@ -77,7 +76,7 @@ func Connect(address, username, password, database string) (*Store, error) {
 		RawQuery: q.Encode(),
 	}
 
-	fmt.Println(u.String())
+	// fmt.Println(u.String())
 
 	db, err := sqlx.Open("postgres", u.String())
 	if err != nil {
