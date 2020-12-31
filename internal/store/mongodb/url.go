@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/nairobi-gophers/fupisha/internal/store/model"
@@ -12,35 +13,41 @@ import (
 )
 
 type urlStore struct {
-	db  *mongo.Database
-	ctx context.Context
+	db *mongo.Database
 }
 
 //New creates a new url document.
-func (u *urlStore) New(userID, originalURL, shortenedURL string) (interface{}, error) {
-	uid, err := primitive.ObjectIDFromHex(userID)
+func (u *urlStore) New(ctx context.Context, userID, originalURL, shortenedURL string) (string, error) {
+	//Lets check if its a valid ObjectID
+	_, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	url := model.URL{
-		ID:           primitive.NewObjectID(),
-		User:         uid,
+		ID:           primitive.NewObjectID().Hex(),
+		User:         userID,
 		OriginalURL:  originalURL,
 		ShortenedURL: shortenedURL,
 		CreatedAt:    time.Now(),
 	}
 
-	result, err := u.db.Collection("urls").InsertOne(u.ctx, url)
+	result, err := u.db.Collection("urls").InsertOne(ctx, url)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return result.InsertedID, nil
+	resultID, ok := result.InsertedID.(string)
+
+	if !ok {
+		return "", errors.New("invalid object id")
+	}
+
+	return resultID, nil
 }
 
 //Get finds a url by id
-func (u *urlStore) Get(id string) (model.URL, error) {
+func (u *urlStore) Get(ctx context.Context, id string) (model.URL, error) {
 	url := model.URL{}
 
 	docID, err := primitive.ObjectIDFromHex(id)
@@ -48,7 +55,7 @@ func (u *urlStore) Get(id string) (model.URL, error) {
 		return url, err
 	}
 
-	if err := u.db.Collection("urls").FindOne(u.ctx, bson.M{"_id": docID}).Decode(&url); err != nil {
+	if err := u.db.Collection("urls").FindOne(ctx, bson.M{"_id": docID}).Decode(&url); err != nil {
 		return url, err
 	}
 
