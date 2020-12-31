@@ -4,24 +4,23 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // User represents an authenticated user.
 type User struct {
-	ID                   primitive.ObjectID `bson:"_id,omitempty"`
-	Name                 string             `bson:"name,omitempty"`
-	CreatedAt            time.Time          `bson:"createdAt,omitempty"`
-	UpdatedAt            time.Time          `bson:"updatedAt, omitempty"`
-	Email                string             `bson:"email,omitempty"`
-	Password             string             `bson:"password,omitempty"`
-	APIKey               uuid.UUID          `bson:"apiKey,omitempty"`
-	ResetPasswordExpires time.Time          `bson:"resetPasswordExpires,omitempty"`
-	ResetPasswordToken   string             `bson:"resetPasswordToken,omitempty"`
-	VerificationExpires  time.Time          `bson:"verificationExpires,omitempty"`
-	VerificationToken    uuid.UUID          `bson:"verificationToken,omitempty"`
-	Verified             bool               `bson:"verified,omitempty"`
+	ID                   string    `bson:"_id,omitempty" db:"id,omitempty"`
+	Name                 string    `bson:"name,omitempty" db:"name,omitempty"`
+	CreatedAt            time.Time `bson:"createdAt,omitempty" db:"created_at,omitempty"`
+	UpdatedAt            time.Time `bson:"updatedAt, omitempty" db:"updated_at,omitempty"`
+	Email                string    `bson:"email,omitempty" db:"email,omitempty"`
+	Password             string    `bson:"password,omitempty" db:"password"`
+	APIKey               uuid.UUID `bson:"apiKey,omitempty" db:"api_key,omitempty"`
+	ResetPasswordExpires time.Time `bson:"resetPasswordExpires,omitempty" db:"reset_password_expires,omitempty"`
+	ResetPasswordToken   string    `bson:"resetPasswordToken,omitempty" db:"reset_password_token,omitempty"`
+	VerificationExpires  time.Time `bson:"verificationExpires,omitempty" db:"verification_expires"`
+	VerificationToken    uuid.UUID `bson:"verificationToken,omitempty" db:"verification_token,omitempty"`
+	Verified             bool      `bson:"verified,omitempty" db:"verified,omitempty"`
 }
 
 //HashPassword hashes the user password using bcrypt hash function
