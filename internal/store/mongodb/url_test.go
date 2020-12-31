@@ -1,6 +1,7 @@
 package mongodb
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -13,19 +14,21 @@ func TestUrl(t *testing.T) {
 	s, teardown := testConn(t)
 	defer teardown("urls")
 
-	id, err := s.Urls().New("5d0575344d9f7ff15e989174", "https:///example.com/shorten-me/2016/caching/6/caching-with-golang/", "https://fupi.sha/sDY6KJ")
+	ctx := context.Background()
+
+	id, err := s.Urls().New(ctx, "5d0575344d9f7ff15e989174", "https:///example.com/shorten-me/2016/caching/6/caching-with-golang/", "https://fupi.sha/sDY6KJ")
 
 	if err != nil {
 		t.Fatalf("failed to create url %s: ", err)
 	}
 
-	if _, ok := id.(primitive.ObjectID); !ok {
-		t.Fatalf("failed to assert the created url insert id")
-	}
+	// if _, ok := id.(primitive.ObjectID); !ok {
+	// 	t.Fatalf("failed to assert the created url insert id")
+	// }
 
-	uid := id.(primitive.ObjectID).Hex()
+	// uid := id.(primitive.ObjectID).Hex()
 
-	url, err := s.Urls().Get(uid)
+	url, err := s.Urls().Get(ctx, id)
 
 	if err != nil {
 		t.Fatalf("failed to get url by id: %s", err)
@@ -42,8 +45,8 @@ func TestUrl(t *testing.T) {
 	}
 
 	want := model.URL{
-		ID:           id.(primitive.ObjectID),
-		User:         userID,
+		ID:           id,
+		User:         userID.String(),
 		OriginalURL:  "https:///example.com/shorten-me/2016/caching/6/caching-with-golang/",
 		ShortenedURL: "https://fupi.sha/sDY6KJ",
 		CreatedAt:    url.CreatedAt,
