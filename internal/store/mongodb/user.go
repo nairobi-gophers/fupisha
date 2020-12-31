@@ -3,7 +3,6 @@ package mongodb
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -18,16 +17,15 @@ import (
 )
 
 type userStore struct {
-	db  *mongo.Database
-	ctx context.Context
+	db *mongo.Database
 }
 
 //New creates a new user document
-func (s userStore) New(name, email, password string) (string, error) {
+func (s userStore) New(ctx context.Context, name, email, password string) (string, error) {
 
 	tkn := encoding.GenUniqueID()
 
-	fmt.Println("TOKEN", tkn)
+	// fmt.Println("TOKEN", tkn)
 	id := primitive.NewObjectID()
 
 	var insertedID string //zero value
@@ -46,7 +44,7 @@ func (s userStore) New(name, email, password string) (string, error) {
 		return insertedID, err
 	}
 
-	result, err := s.db.Collection("users").InsertOne(s.ctx, user)
+	result, err := s.db.Collection("users").InsertOne(ctx, user)
 	if err != nil {
 		return insertedID, err
 	}
@@ -63,7 +61,7 @@ func (s userStore) New(name, email, password string) (string, error) {
 }
 
 //Get finds a user by id
-func (s userStore) Get(id string) (model.User, error) {
+func (s userStore) Get(ctx context.Context, id string) (model.User, error) {
 
 	user := model.User{}
 
@@ -72,7 +70,7 @@ func (s userStore) Get(id string) (model.User, error) {
 		return user, err
 	}
 
-	if err := s.db.Collection("users").FindOne(s.ctx, bson.M{"_id": id}).Decode(&user); err != nil {
+	if err := s.db.Collection("users").FindOne(ctx, bson.M{"_id": id}).Decode(&user); err != nil {
 		return user, err
 	}
 
@@ -80,10 +78,10 @@ func (s userStore) Get(id string) (model.User, error) {
 }
 
 //GetByEmail retrieve an existing user with the given email
-func (s userStore) GetByEmail(email string) (model.User, error) {
+func (s userStore) GetByEmail(ctx context.Context, email string) (model.User, error) {
 	user := model.User{}
 
-	if err := s.db.Collection("users").FindOne(s.ctx, bson.M{"email": email}).Decode(&user); err != nil {
+	if err := s.db.Collection("users").FindOne(ctx, bson.M{"email": email}).Decode(&user); err != nil {
 		return user, err
 	}
 
@@ -91,7 +89,7 @@ func (s userStore) GetByEmail(email string) (model.User, error) {
 }
 
 //SetAPIKey sets the api key for the given user id.
-func (s userStore) SetAPIKey(id string, key uuid.UUID) error {
+func (s userStore) SetAPIKey(ctx context.Context, id string, key uuid.UUID) error {
 
 	_, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -110,7 +108,7 @@ func (s userStore) SetAPIKey(id string, key uuid.UUID) error {
 		Upsert:         &upsert,
 	}
 
-	result := s.db.Collection("users").FindOneAndUpdate(s.ctx, filter, update, &opt)
+	result := s.db.Collection("users").FindOneAndUpdate(ctx, filter, update, &opt)
 
 	if result.Err() != nil {
 		return result.Err()
