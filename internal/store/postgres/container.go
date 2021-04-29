@@ -20,10 +20,10 @@ type testConfig struct {
 }
 
 type PostgresqlContainer struct {
-	pool     *dockertest.Pool
-	resource *dockertest.Resource
-	image    string
-	opts     testConfig
+	pool      *dockertest.Pool
+	resource  *dockertest.Resource
+	imagename string
+	opts      testConfig
 }
 
 func NewPostgresqlContainer(pool *dockertest.Pool) PostgresqlContainer {
@@ -35,11 +35,11 @@ func NewPostgresqlContainer(pool *dockertest.Pool) PostgresqlContainer {
 		Port:     5432,
 	}
 
-	return PostgresqlContainer{pool: pool, opts: opts, image: "postgresql-testcontainer"}
+	return PostgresqlContainer{pool: pool, opts: opts, imagename: "postgresql-testcontainer"}
 }
 
 func (container PostgresqlContainer) Create() error {
-	if isRunning(*container.pool, container.image) {
+	if isRunning(*container.pool, container.imagename) {
 		return nil
 	}
 
@@ -55,7 +55,7 @@ func (container PostgresqlContainer) Create() error {
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			docker.Port(strconv.Itoa(container.opts.Port)): {{HostIP: "0.0.0.0", HostPort: strconv.Itoa(container.opts.Port)}},
 		},
-		Name: container.image,
+		Name: container.imagename,
 	}
 
 	resource, err := container.pool.RunWithOptions(&dockerOpts)
@@ -96,7 +96,7 @@ func isRunning(pool dockertest.Pool, imagename string) bool {
 	for _, dockerContainer := range dockerContainers {
 		for _, name := range dockerContainer.Names {
 			if strings.Contains(name, imagename) {
-				// fmt.Printf("%s image is running...", dockerContainer.Image)
+				// fmt.Printf("%s imagename is running...", dockerContainer.imagename)
 				return true
 			}
 		}
