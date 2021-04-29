@@ -9,7 +9,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nairobi-gophers/fupisha/internal/encoding"
 	"github.com/nairobi-gophers/fupisha/internal/store"
-	"github.com/nairobi-gophers/fupisha/internal/store/mongodb"
+	"github.com/nairobi-gophers/fupisha/internal/store/postgres"
 )
 
 //Config is a fupisha configuration struct
@@ -34,7 +34,7 @@ type Config struct {
 	//SMTP third party email provider smtp configuration fields.
 	SMTP struct {
 		//Port smtp port
-		Port int `envconfig:"FUPISHA_SMTP_PORT"`
+		Port string `envconfig:"FUPISHA_SMTP_PORT"`
 		//Host smtp host e.g. smtp.gmail.com
 		Host string `envconfig:"FUPISHA_SMTP_HOST"`
 		//Username smtp username.
@@ -93,20 +93,20 @@ type Config struct {
 //GetStore returns a connection to the relevant database as specified on the config
 func (cfg *Config) GetStore() (store.Store, error) {
 	switch cfg.Store.Type {
-	case "mongo":
+	case "postgresql":
 		var (
-			address  = cfg.Store.Mongo.Address
-			username = cfg.Store.Mongo.Username
-			password = cfg.Store.Mongo.Password
-			database = cfg.Store.Mongo.Database
+			address  = cfg.Store.PostgreSQL.Address
+			username = cfg.Store.PostgreSQL.Username
+			password = cfg.Store.PostgreSQL.Password
+			database = cfg.Store.PostgreSQL.Database
 		)
 
 		if (address == "") || (username == "") || (database == "") || (password == "") {
-			err := errors.New("missing mongodb configuration variable")
+			err := errors.New("missing postgresql configuration variable")
 			log.Fatalf("config: %s", err.Error())
 		}
 		// address := fmt.Sprintf("%s:%s", host, port)
-		return mongodb.Connect(
+		return postgres.Connect(
 			address,
 			username,
 			password,
