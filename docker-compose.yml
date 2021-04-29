@@ -6,23 +6,39 @@ services:
       context: .
     container_name: api
     depends_on:
-      - mongodb
+      - postgresql
       - redis
     ports:
       - 8080:8080
     command:
-      [
-        "./wait-for-it.sh",
-        "mongodb:27017",
-        "--strict",
-        "--timeout=300",
-        "--",
-        "./main",
-        "start",
-      ]
+      ["./main", "start",]
     volumes:
       - ./fupisha:/fupisha
     tty: true
+    environment: #loaded from .env file
+      # smtp config 
+      - FUPISHA_SMTP_PORT=${FUPISHA_SMTP_PORT}
+      - FUPISHA_SMTP_HOST=${FUPISHA_SMTP_HOST}
+      - FUPISHA_SMTP_USER=${FUPISHA_SMTP_USER}
+      - FUPISHA_SMTP_PASSWORD=${FUPISHA_SMTP_PASSWORD}
+      - FUPISHA_SMTP_FROM_NAME=${FUPISHA_SMTP_FROM_NAME}
+      - FUPISHA_SMTP_FROM_ADDRESS=${FUPISHA_SMTP_FROM_ADDRESS}
+      # store type
+      - FUPISHA_STORE_TYPE=${FUPISHA_STORE_TYPE}
+      # database config
+      - FUPISHA_STORE_POSTGRESQL_ADDRESS=${FUPISHA_STORE_POSTGRESQL_ADDRESS}
+      - FUPISHA_STORE_POSTGRESQL_USERNAME=${FUPISHA_STORE_POSTGRESQL_USERNAME}
+      - FUPISHA_STORE_POSTGRESQL_PASSWORD=${FUPISHA_STORE_POSTGRESQL_PASSWORD}
+      - FUPISHA_STORE_POSTGRESQL_DATABASE=${FUPISHA_STORE_POSTGRESQL_DATABASE}
+      # auth config
+      - FUPISHA_JWT_SECRET=${FUPISHA_JWT_SECRET}
+      - FUPISHA_JWT_EXPIRE_DELTA=${FUPISHA_JWT_EXPIRE_DELTA}
+      # app config
+      - FUPISHA_BASE_URL=${FUPISHA_BASE_URL}
+      - FUPISHA_TITLE=${FUPISHA_TITLE}
+      - FUPISHA_LOG_LEVEL=${FUPISHA_LOG_LEVEL}
+      - FUPISHA_TEXT_LOGGING=${FUPISHA_TEXT_LOGGING}
+      - FUPISHA_PARAM_LENGTH=${FUPISHA_PARAM_LENGTH}
     networks:
       - fupisha-api
 
@@ -34,30 +50,28 @@ services:
       - 6379:6379
     command: redis-server --appendonly yes --requirepass Fup1sha
     volumes:
-      - redis_data:/data
+      - fp-redis_data:/data
     networks:
       - fupisha-api
-  #Mongo Database Container
-  mongodb:
-    image: mongo:4.2.0
-    container_name: mongodb
+      
+  #Postgresql Database Container
+  postgresql:
+    image: postgres:13-alpine
+    container_name: db
     environment:
-      - MONGO_INITDB_DATABASE=fupisha
-      - MONGO_INITDB_USERNAME=fupisha
-      - MONGO_INITDB_PASSWORD=fupisha
-      - MONGO_INITDB_ROOT_USERNAME=fp_root
-      - MONGO_INITDB_ROOT_PASSWORD=fp_s3cr37_!
+      - POSTGRES_DB=${FUPISHA_STORE_POSTGRESQL_DATABASE}
+      - POSTGRES_USER=${FUPISHA_STORE_POSTGRESQL_USERNAME}
+      - POSTGRES_PASSWORD=${FUPISHA_STORE_POSTGRESQL_PASSWORD}
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - "./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro" # copy init-mongo.sh to /docker-entrypoint-initdb.d/ as a read only file./docker-entrypoint-initdb.d is a folder that is already created inside the mongo container used for initiating database, so we copy our script to that folder
-      - "mongo_data:/data/db" # persist data on the container in a local folder named mongo-data. /data/db/ is a folder that already created inside the mongo container.
+      - "fp-pg_data:/data/db" # persist data on the container in a local folder named fp_data. /data/db/ is a folder that already created inside the postgresql container.
     networks:
       - fupisha-api
 
 volumes:
-  mongo_data:
-  redis_data:
+  fp-pg_data:
+  fp-redis_data:
   fupisha:
 
 networks:
