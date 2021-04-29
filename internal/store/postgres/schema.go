@@ -4,14 +4,13 @@ var migrate = []string{
 	`
 	CREATE TABLE IF NOT EXISTS users (
 		id UUID PRIMARY KEY,
-		"name" TEXT,
 		email TEXT UNIQUE,
 		"password" TEXT,
-		api_key UUID default '00000000-0000-0000-0000-000000000000',
-		reset_password_token UUID  default '00000000-0000-0000-0000-000000000000',
+		api_key UUID,
+		reset_password_token UUID,
 		reset_password_expires TIMESTAMP,
 		verification_expires TIMESTAMP,
-		verification_token UUID default '00000000-0000-0000-0000-000000000000',
+		verification_token UUID,
 		verified BOOLEAN DEFAULT FALSE,
 		created_at TIMESTAMP,
 		updated_at TIMESTAMP
