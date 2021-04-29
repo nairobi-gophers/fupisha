@@ -1,6 +1,7 @@
 package auth_test
 
 import (
+	"context"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -13,9 +14,8 @@ import (
 	"github.com/nairobi-gophers/fupisha/api"
 	"github.com/nairobi-gophers/fupisha/internal/config"
 	"github.com/nairobi-gophers/fupisha/internal/encoding"
+	"github.com/nairobi-gophers/fupisha/internal/store"
 	"github.com/nairobi-gophers/fupisha/internal/store/mock"
-	"github.com/nairobi-gophers/fupisha/internal/store/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestHandleSignup(t *testing.T) {
@@ -27,9 +27,18 @@ func TestHandleSignup(t *testing.T) {
 
 	store := mock.Store{
 		UserStore: mock.UserStore{
-			OnNew: func(name, email, password string) (primitive.ObjectID, error) {
-				id, _ := primitive.ObjectIDFromHex("5d0575344d9f7ff15e989174")
-				return id, nil
+			OnNew: func(ctx context.Context, email, password string) (store.User, error) {
+
+				user := store.User{
+					Email:    email,
+					Password: password,
+				}
+
+				if err := user.HashPassword(); err != nil {
+					return store.User{}, err
+				}
+
+				return user, nil
 			},
 		},
 	}
@@ -45,24 +54,19 @@ func TestHandleSignup(t *testing.T) {
 		wantBody string
 	}{
 		{
-			body:     `{"email":"parish@fupisha.io","name":"parish","password":"str0ngpa55w0rd"}`,
+			body:     `{"email":"parish@fupisha.io","password":"str0ngpa55w0rd"}`,
 			wantCode: http.StatusCreated,
 			wantBody: `{}`,
 		},
 		{
-			body:     `{"email":"admin@fupisha.io","name":"admin","password":"str0ngpa55w0rd_"}`,
+			body:     `{"email":"admin@fupisha.io","password":"str0ngpa55w0rd_"}`,
 			wantCode: http.StatusUnprocessableEntity,
 			wantBody: `{"status":"Unprocessable Entity","error":"password: must contain English letters and digits only."}`,
 		},
 		{
-			body:     `{"email":"invalid@fupisha","name":"admin","password":"str0ngpa55w0rd"}`,
+			body:     `{"email":"invalid@fupisha","password":"str0ngpa55w0rd"}`,
 			wantCode: http.StatusUnprocessableEntity,
 			wantBody: `{"status":"Unprocessable Entity","error":"email: must be a valid email address."}`,
-		},
-		{
-			body:     `{"email":"noreply@fupisha.io","name":"_","password":"str0ngpa55w0rd"}`,
-			wantCode: http.StatusUnprocessableEntity,
-			wantBody: `{"status":"Unprocessable Entity","error":"name: the length must be between 3 and 32."}`,
 		},
 	}
 
@@ -98,8 +102,24 @@ func TestHandleLogin(t *testing.T) {
 	}
 
 	testKey := encoding.GenUniqueID()
+	testSecret := "c4c0f2c42bde58f4d5f453483b3bed2b2915779cacff15526b2560b00748ec36"
 
 	cfg, err := config.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(cfg.JWT.Secret) == 0 {
+		cfg.JWT.Secret = testSecret
+	}
+
+	if cfg.JWT.ExpireDelta == 0 {
+		cfg.JWT.ExpireDelta = 6
+	}
+
+	uid := "JBxPVPeqS72SqJzESF2TVw"
+
+	testID, err := encoding.Decode(uid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,69 +129,73 @@ func TestHandleLogin(t *testing.T) {
 	// 	t.Fatal(err)
 	// }
 
-	// testToken, err := jwtService.Encode("5d0575344d9f7ff15e989174")
+	// testToken, err := jwtService.Encode(testID.String())
 	// if err != nil {
 	// 	t.Fatal(err)
 	// }
 
 	store := mock.Store{
 		UserStore: mock.UserStore{
-			OnGet: func(id string) (model.User, error) {
+			OnGet: func(ctxt context.Context, id uuid.UUID) (store.User, error) {
 				switch id {
-				case "5d0575344d9f7ff15e989174":
-					id, _ := primitive.ObjectIDFromHex("5d0575344d9f7ff15e989174")
-					return model.User{
-						ID:                   id,
-						Email:                "parish@fupisha.io",
-						Password:             "str0ngpa55w0rd",
-						Name:                 "parish",
-						CreatedAt:            testTime,
-						APIKey:               testKey,
-						ResetPasswordExpires: testTime,
-						ResetPasswordToken:   "TestResetPasswordToken",
-						VerificationExpires:  testTime,
-						VerificationToken:    testKey,
-					}, nil
+				case testID:
+					u := store.User{
+						ID:                  testID,
+						Email:               "parish@fupisha.io",
+						Password:            "str0ngpa55w0rd",
+						CreatedAt:           testTime,
+						UpdatedAt:           testTime,
+						VerificationExpires: testTime.Add(time.Minute * 60),
+						VerificationToken:   testKey,
+					}
+
+					u.HashPassword()
+
+					return u, nil
 				}
-				return model.User{}, errors.New("Not found")
+				return store.User{}, errors.New("Not found")
 			},
-			OnGetByEmail: func(email string) (model.User, error) {
+			OnGetByEmail: func(ctx context.Context, email string) (store.User, error) {
 				switch email {
 				case "parish@fupisha.io":
-					id, _ := primitive.ObjectIDFromHex("5d0575344d9f7ff15e989174")
-					usr := model.User{
-						ID:                   id,
-						Email:                "parish@fupisha.io",
-						Password:             "str0ngpa55w0rd",
-						Name:                 "parish",
-						CreatedAt:            testTime,
-						APIKey:               testKey,
-						ResetPasswordExpires: testTime,
-						ResetPasswordToken:   "TestResetPasswordToken",
-						VerificationExpires:  testTime,
-						VerificationToken:    testKey,
+
+					usr := store.User{
+						ID:                  testID,
+						Email:               "parish@fupisha.io",
+						Password:            "str0ngpa55w0rd",
+						CreatedAt:           testTime,
+						APIKey:              testKey,
+						VerificationExpires: testTime.Add(time.Minute * 60),
+						VerificationToken:   testKey,
 					}
 
 					usr.HashPassword()
 
 					return usr, nil
 				}
-				return model.User{}, errors.New("Not found")
+				return store.User{}, errors.New("Not found")
 			},
-			OnSetAPIKey: func(id string, key uuid.UUID) (model.User, error) {
-				uid, _ := primitive.ObjectIDFromHex(id)
-				return model.User{
-					ID:                   uid,
-					Email:                "parish@fupisha.io",
-					Password:             "str0ngpa55w0rd",
-					Name:                 "parish",
-					CreatedAt:            testTime,
-					APIKey:               testKey,
-					ResetPasswordExpires: testTime,
-					ResetPasswordToken:   "TestResetPasswordToken",
-					VerificationExpires:  testTime,
-					VerificationToken:    testKey,
-				}, nil
+			OnSetAPIKey: func(ctx context.Context, id, key uuid.UUID) error {
+
+				switch id {
+
+				case testID:
+					u := store.User{
+						ID:                  testID,
+						Email:               "parish@fupisha.io",
+						Password:            "str0ngpa55w0rd",
+						CreatedAt:           testTime,
+						APIKey:              testKey,
+						VerificationExpires: testTime.Add(time.Minute * 60),
+						VerificationToken:   testKey,
+					}
+
+					u.HashPassword()
+
+					return nil
+				}
+
+				return errors.New("Not found")
 			},
 		},
 	}
@@ -186,13 +210,12 @@ func TestHandleLogin(t *testing.T) {
 		wantCode int
 		wantBody string
 	}{
-		//TODO: Add check for this test case. Note: token field is variable.
+		//TODO: Test for valid jwt token upon successful login.Add check for this test case. Note: token field is variable, it changes with each request call.
 		// {
 		// 	body:     `{"email":"parish@fupisha.io","password":"str0ngpa55w0rd"}`,
 		// 	wantCode: http.StatusOK,
-		// 	wantBody: fmt.Sprintf(`{"email":"parish@fupisha.io","name":"parish",
-		// 	"id":"5d0575344d9f7ff15e989174",
-		// 	"token":"%s"}`, testToken),
+		// 	wantBody: fmt.Sprintf(`{"email":"parish@fupisha.io","id":"%s",
+		// 	"token":"%s"}`, testID, testToken),
 		// },
 		{
 			body:     `{"email":"parish@fupisha.io","password":"str0ngpa55word"}`,
@@ -225,7 +248,7 @@ func TestHandleLogin(t *testing.T) {
 		}
 
 		if tc.wantBody != strings.TrimSuffix(rr.Body.String(), "\n") {
-			t.Fatalf("handler returned unexpected body: want response body %q got %q", tc.wantBody, strings.TrimSuffix(rr.Body.String(), "\n"))
+			t.Fatalf("handler returned unexpected body: want response body %q\n got %q", tc.wantBody, strings.TrimSuffix(rr.Body.String(), "\n"))
 		}
 	}
 }
