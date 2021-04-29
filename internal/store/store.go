@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/gofrs/uuid"
-	"github.com/nairobi-gophers/fupisha/internal/store/model"
 )
 
 //Store is a data store interface.
@@ -15,14 +14,14 @@ type Store interface {
 
 //UserStore is a user data store interface.
 type UserStore interface {
-	New(ctx context.Context, name, email, password string) (model.User, error)
-	Get(ctx context.Context, id string) (model.User, error)
-	GetByEmail(ctx context.Context, email string) (model.User, error)
-	SetAPIKey(ctx context.Context, id string, key uuid.UUID) error
+	New(ctx context.Context, email, password string) (User, error)
+	Get(ctx context.Context, id uuid.UUID) (User, error)
+	GetByEmail(ctx context.Context, email string) (User, error)
+	SetAPIKey(ctx context.Context, id, key uuid.UUID) error
 }
 
 //URLStore is a url data store interface.
 type URLStore interface {
-	New(ctx context.Context, userID, originalURL, shortenedURL string) (model.URL, error)
-	Get(ctx context.Context, id string) (model.URL, error)
+	New(ctx context.Context, userID uuid.UUID, originalURL, shortenedURL string) (URL, error)
+	Get(ctx context.Context, id uuid.UUID) (URL, error)
 }
