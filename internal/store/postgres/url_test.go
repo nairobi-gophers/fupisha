@@ -6,12 +6,14 @@ import (
 )
 
 func TestURL(t *testing.T) {
-	s, tearDown := testConn(t)
-	defer t.Cleanup(tearDown)
+	s, err := newTestDatabase(t)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	ctx := context.Background()
 
-	u, err := s.Users().New(ctx, "test_user", "test_user@test.com", "test_password")
+	u, err := s.Users().New(ctx, "test_user@test.com", "test_password")
 
 	if err != nil {
 		t.Fatalf("failed to create user: %s", err)
