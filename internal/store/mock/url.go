@@ -1,17 +1,22 @@
 package mock
 
-import "github.com/nairobi-gophers/fupisha/internal/store/model"
+import (
+	"context"
+
+	"github.com/gofrs/uuid"
+	"github.com/nairobi-gophers/fupisha/internal/store"
+)
 
 //URLStore is a mock implementation of store.urlStore
 type URLStore struct {
-	OnNew func(userID, originalURL, shortenedURL string) (interface{}, error)
-	OnGet func(id string) (model.URL, error)
+	OnNew func(ctx context.Context, userID uuid.UUID, originalURL, shortenedURL string) (store.URL, error)
+	OnGet func(ctx context.Context, id uuid.UUID) (store.URL, error)
 }
 
-func (u URLStore) New(userID, originalURL, shortenedURL string) (interface{}, error) {
-	return u.OnNew(userID, originalURL, shortenedURL)
+func (u URLStore) New(ctx context.Context, userID uuid.UUID, originalURL, shortenedURL string) (store.URL, error) {
+	return u.OnNew(ctx, userID, originalURL, shortenedURL)
 }
 
-func (u URLStore) Get(id string) (model.URL, error) {
-	return u.OnGet(id)
+func (u URLStore) Get(ctx context.Context, id uuid.UUID) (store.URL, error) {
+	return u.OnGet(ctx, id)
 }
