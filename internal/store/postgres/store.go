@@ -1,7 +1,9 @@
 package postgres
 
 import (
+	"context"
 	"net/url"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // The database driver in use.
@@ -76,15 +78,13 @@ func Connect(address, username, password, database string) (*Store, error) {
 		RawQuery: q.Encode(),
 	}
 
-	// fmt.Println(u.String())
-
 	db, err := sqlx.Open("postgres", u.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "connecting to database")
 	}
 
-	if err := db.Ping(); err != nil {
-		return nil, errors.Wrap(err, "database connection not found")
+	if err := statusCheck(context.Background(), db); err != nil {
+		return nil, errors.Wrap(err, "connect: connection never ready")
 	}
 
 	s := Store{
@@ -99,4 +99,23 @@ func Connect(address, username, password, database string) (*Store, error) {
 	}
 
 	return &s, nil
+}
+
+func statusCheck(ctx context.Context, db *sqlx.DB) error {
+	var pingError error
+	for attempts := 1; ; attempts++ {
+		pingError = db.Ping()
+		if pingError == nil {
+			break
+		}
+		time.Sleep(time.Duration(attempts) * 100 * time.Millisecond)
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+	}
+
+	//I am  paranoid and we like to detect any false positive.
+	const q = `SELECT true`
+	var tmp bool
+	return db.QueryRowContext(ctx, q).Scan(&tmp)
 }
