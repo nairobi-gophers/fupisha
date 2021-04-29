@@ -6,21 +6,24 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nairobi-gophers/fupisha/internal/store/model"
+	_ "github.com/lib/pq"
+	"github.com/nairobi-gophers/fupisha/internal/store"
 )
 
 func TestUser(t *testing.T) {
 
-	s, tearDown := testConn(t)
-	defer t.Cleanup(tearDown)
+	s, err := newTestDatabase(t)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	ctx := context.Background()
 
-	wantName := "test_user"
+	// wantName := "test_user"
 	wantEmail := "test_user@test.com"
 	wantPassword := "test_password"
 
-	u, err := s.Users().New(ctx, wantName, wantEmail, wantPassword)
+	u, err := s.Users().New(ctx, wantEmail, wantPassword)
 
 	if err != nil {
 		t.Fatalf("failed to create test_user1: %s", err)
@@ -33,7 +36,7 @@ func TestUser(t *testing.T) {
 		t.Fatalf("bad user.CreatedAt: %v", u.CreatedAt)
 	}
 
-	beforeVerificationExpiry := u.VerificationExpires.Sub(time.Now())
+	beforeVerificationExpiry := time.Until(u.VerificationExpires)
 
 	//We are checking how many minutes we have until the verification token expires.
 	//It cannot be 60 since some seconds elapse between creating the token and the point at which we are verifying it.
@@ -42,11 +45,10 @@ func TestUser(t *testing.T) {
 		t.Fatalf("bad user.VerificationExpires: %v", u.VerificationExpires)
 	}
 
-	want := model.User{
+	want := store.User{
 		ID:                   u.ID,
-		Name:                 wantName,
 		Email:                wantEmail,
-		ResetPasswordExpires: time.Time{},
+		ResetPasswordExpires: u.ResetPasswordExpires,
 		ResetPasswordToken:   u.ResetPasswordToken,
 		VerificationExpires:  u.VerificationExpires,
 		VerificationToken:    u.VerificationToken,
