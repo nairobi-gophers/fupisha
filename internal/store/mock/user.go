@@ -1,31 +1,32 @@
 package mock
 
 import (
+	"context"
+
 	"github.com/gofrs/uuid"
-	"github.com/nairobi-gophers/fupisha/internal/store/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/nairobi-gophers/fupisha/internal/store"
 )
 
 // UserStore is a mock implementation of store.UserStore.
 type UserStore struct {
-	OnNew        func(name, email, password string) (primitive.ObjectID, error)
-	OnGet        func(id string) (model.User, error)
-	OnGetByEmail func(email string) (model.User, error)
-	OnSetAPIKey  func(id string, key uuid.UUID) (model.User, error)
+	OnNew        func(ctx context.Context, email, password string) (store.User, error)
+	OnGet        func(ctx context.Context, id uuid.UUID) (store.User, error)
+	OnGetByEmail func(ctx context.Context, email string) (store.User, error)
+	OnSetAPIKey  func(ctx context.Context, id, key uuid.UUID) error
 }
 
-func (s UserStore) New(name, email, password string) (primitive.ObjectID, error) {
-	return s.OnNew(name, email, password)
+func (s UserStore) New(ctx context.Context, email, password string) (store.User, error) {
+	return s.OnNew(ctx, email, password)
 }
 
-func (s UserStore) Get(id string) (model.User, error) {
-	return s.OnGet(id)
+func (s UserStore) Get(ctx context.Context, id uuid.UUID) (store.User, error) {
+	return s.OnGet(ctx, id)
 }
 
-func (s UserStore) GetByEmail(email string) (model.User, error) {
-	return s.OnGetByEmail(email)
+func (s UserStore) GetByEmail(ctx context.Context, email string) (store.User, error) {
+	return s.OnGetByEmail(ctx, email)
 }
 
-func (s UserStore) SetAPIKey(id string, key uuid.UUID) (model.User, error) {
-	return s.OnSetAPIKey(id, key)
+func (s UserStore) SetAPIKey(ctx context.Context, id, key uuid.UUID) error {
+	return s.OnSetAPIKey(ctx, id, key)
 }
