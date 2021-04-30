@@ -8,7 +8,7 @@ import (
 
 //URL contains all the related info about the shortened url.
 type URL struct {
-	ID           string    `db:"id"`
+	ID           uuid.UUID `db:"id"`
 	Owner        uuid.UUID `db:"owner"`
 	OriginalURL  string    `db:"original_url"`
 	ShortenedURL string    `db:"short_url"`
