@@ -19,7 +19,7 @@ Fupisha is a modern url shortening service.
 
 - Go (language)
 - go-chi/chi (http routing)
-- mongo (database)
+- postgresql (database)
 - redis (cache layer)
 - vuejs (web UI library)
 - vuex (state management)
@@ -28,29 +28,31 @@ Fupisha is a modern url shortening service.
 
 # Setup
 
-You need to have Golang installed at the very least `Go 1.11`. The easiest way to set up fupisha in your local environment is to install it using go get:
+You need to have Golang installed at the very least `Go 1.11`. The easiest way to get started with fupisha in your local environment is to clone it using git:
 
-```Go
- go get github.com/nairobi-gophers/fupisha
+```
+ git clone https://github.com/nairobi-gophers/fupisha.git
 ```
 
-Run the mongo container which the app will use. Later we will also dockerize the app.
+Run the application.
 
-```Go
+```
  docker-compose up
 ```
 
 # Why build this
 
-It will involve the community and cool techniques like:
+It will involve the community and awesome technologies like:
 
 - Golang unit testing
 - VueJS
 - Makefiles
 - Circle CI
-- Document Databases
+- Relational Database
 - In Memory caching
-- Dockerfile, Docker Compose and Docker Image/Container Creation
+- Docker Compose and Docker
+
+Let's learn together.
 
 ## License
 
