@@ -26,7 +26,7 @@ func (u *urlStore) New(ctx context.Context, userID uuid.UUID, originalURL, short
 	now := time.Now()
 
 	url := store.URL{
-		ID:           encoding.GenUniqueID().String(),
+		ID:           encoding.GenUniqueID(),
 		Owner:        userID,
 		OriginalURL:  originalURL,
 		ShortenedURL: shortenedURL,
