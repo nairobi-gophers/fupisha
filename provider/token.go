@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -30,16 +29,12 @@ type Claims struct {
 
 //NewJWTService configures and returns a JWT authentication instance.
 func NewJWTService(secret string) (JWTService, error) {
-	secretBytes, err := hex.DecodeString(secret)
-	if err != nil {
-		return nil, fmt.Errorf("jwt: failed to decode jwt secret from string %s: %w", secret, err)
-	}
 
-	if len(secretBytes) < 32 {
+	if len([]byte(secret)) < 32 {
 		return nil, errors.New("jwt: secret too short")
 	}
 
-	return &service{secret: secretBytes}, nil
+	return &service{secret: []byte(secret)}, nil
 }
 
 // Encode a claim into a JWT
