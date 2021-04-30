@@ -15,3 +15,6 @@
 # vendor/
 .env
 
+# project layouts
+project_layout.md
+project_layout_proposals.md
