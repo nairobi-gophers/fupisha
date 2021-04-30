@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"encoding/hex"
 	"net/http"
 	"strings"
 
@@ -36,7 +35,7 @@ func Verifier(cfg *config.Config) func(next http.Handler) http.Handler {
 				}
 				token := authHeader[7:]
 
-				secret := hex.EncodeToString([]byte(cfg.JWT.Secret))
+				secret := cfg.JWT.Secret
 				service, err := provider.NewJWTService(secret)
 				if err != nil {
 					log(r).WithField("secret", secret).Error(err)
