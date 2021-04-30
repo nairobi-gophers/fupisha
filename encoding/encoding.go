@@ -32,12 +32,8 @@ func Decode(id string) (uuid.UUID, error) {
 }
 
 //GenUniqueParam returns a random param but unique key.
-func GenUniqueParam(alphanumeric string, len int) string {
-	param, err := nanoid.Generate(alphanumeric, len)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return param
+func GenUniqueParam(alphanumeric string, len int) (string, error) {
+	return nanoid.Generate(alphanumeric, len)
 }
 
 //GenUniqueID returns a random but unique id.
