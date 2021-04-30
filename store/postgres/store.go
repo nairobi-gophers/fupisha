@@ -7,7 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // The database driver in use.
-	"github.com/nairobi-gophers/fupisha/internal/store"
+	"github.com/nairobi-gophers/fupisha/store"
 	"github.com/pkg/errors"
 )
 

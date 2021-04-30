@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/nairobi-gophers/fupisha/internal/config"
+	"github.com/nairobi-gophers/fupisha/config"
 )
 
 //JWTService defines an implementation of our JWT authentication service.

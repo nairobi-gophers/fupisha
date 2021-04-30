@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/nairobi-gophers/fupisha/api"
-	"github.com/nairobi-gophers/fupisha/internal/config"
+	"github.com/nairobi-gophers/fupisha/config"
 )
 
 var (

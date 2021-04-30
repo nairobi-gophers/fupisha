@@ -7,7 +7,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	"github.com/nairobi-gophers/fupisha/internal/store"
+	"github.com/nairobi-gophers/fupisha/store"
 )
 
 func TestUser(t *testing.T) {

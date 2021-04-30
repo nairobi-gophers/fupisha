@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/middleware"
-	"github.com/nairobi-gophers/fupisha/internal/config"
+	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/sirupsen/logrus"
 )
 

@@ -1,6 +1,6 @@
 package mock
 
-import "github.com/nairobi-gophers/fupisha/internal/store"
+import "github.com/nairobi-gophers/fupisha/store"
 
 // Store is a mock implementation of store.Store.
 type Store struct {

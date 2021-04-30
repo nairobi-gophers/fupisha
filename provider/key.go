@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/gofrs/uuid"
-	"github.com/nairobi-gophers/fupisha/internal/encoding"
-	"github.com/nairobi-gophers/fupisha/internal/store"
+	"github.com/nairobi-gophers/fupisha/encoding"
+	"github.com/nairobi-gophers/fupisha/store"
 )
 
 //GenAPIKey generates an api key for third party applications.

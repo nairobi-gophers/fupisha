@@ -6,8 +6,8 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/nairobi-gophers/fupisha/internal/encoding"
-	"github.com/nairobi-gophers/fupisha/internal/store"
+	"github.com/nairobi-gophers/fupisha/encoding"
+	"github.com/nairobi-gophers/fupisha/store"
 	"github.com/pkg/errors"
 )
 

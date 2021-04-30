@@ -12,8 +12,8 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 
 	"github.com/nairobi-gophers/fupisha/api/v1/auth"
-	"github.com/nairobi-gophers/fupisha/internal/encoding"
-	"github.com/nairobi-gophers/fupisha/internal/logging"
+	"github.com/nairobi-gophers/fupisha/encoding"
+	"github.com/nairobi-gophers/fupisha/logging"
 )
 
 type shortenURLRequest struct {
@@ -36,15 +36,22 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, ok := auth.FromContext(r.Context())
+	uid, ok := auth.FromContext(r.Context())
 	if !ok {
 		log(r).Error(errors.New("could not extract userID from context"))
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
+	userID, err := encoding.Decode(uid)
+	if err != nil {
+		log(r).Error(err)
+		render.Render(w, r, ErrInternalServerError)
+		return
+	}
+
 	//Lets validate that userID actually belongs to a real user.
-	_, err := rs.Store.Users().Get(userID)
+	_, err = rs.Store.Users().Get(r.Context(), userID)
 	if err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
@@ -54,7 +61,7 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 	link := Shorten(body.URL, rs.Config.BaseURL, rs.Config.ParamLength)
 
 	//Insert the shortened url in the database
-	_, err = rs.Store.Urls().New(userID, body.URL, link)
+	_, err = rs.Store.Urls().New(r.Context(), userID, body.URL, link)
 	if err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)

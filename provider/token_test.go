@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nairobi-gophers/fupisha/internal/encoding"
+	"github.com/nairobi-gophers/fupisha/encoding"
 )
 
 func TestEncodeDecode(t *testing.T) {

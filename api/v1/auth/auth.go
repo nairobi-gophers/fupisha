@@ -3,8 +3,8 @@ package auth
 import (
 	"context"
 
-	"github.com/nairobi-gophers/fupisha/internal/config"
-	"github.com/nairobi-gophers/fupisha/internal/store"
+	"github.com/nairobi-gophers/fupisha/config"
+	"github.com/nairobi-gophers/fupisha/store"
 )
 
 //Resource defines dependencies for auth handlers.

@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/nairobi-gophers/fupisha/internal/encoding"
-	"github.com/nairobi-gophers/fupisha/internal/store"
-	"github.com/nairobi-gophers/fupisha/internal/store/postgres"
+	"github.com/nairobi-gophers/fupisha/encoding"
+	"github.com/nairobi-gophers/fupisha/store"
+	"github.com/nairobi-gophers/fupisha/store/postgres"
 )
 
 //Config is a fupisha configuration struct

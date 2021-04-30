@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/go-chi/render"
-	"github.com/nairobi-gophers/fupisha/internal/config"
-	"github.com/nairobi-gophers/fupisha/internal/provider"
+	"github.com/nairobi-gophers/fupisha/config"
+	"github.com/nairobi-gophers/fupisha/provider"
 )
 
 //The key type is unexported to prevent collisions with context keys defined in

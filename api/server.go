@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/nairobi-gophers/fupisha/internal/config"
+	"github.com/nairobi-gophers/fupisha/config"
 )
 
 //Server defines our server dependencies

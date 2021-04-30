@@ -12,10 +12,10 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/nairobi-gophers/fupisha/api"
-	"github.com/nairobi-gophers/fupisha/internal/config"
-	"github.com/nairobi-gophers/fupisha/internal/encoding"
-	"github.com/nairobi-gophers/fupisha/internal/store"
-	"github.com/nairobi-gophers/fupisha/internal/store/mock"
+	"github.com/nairobi-gophers/fupisha/config"
+	"github.com/nairobi-gophers/fupisha/encoding"
+	"github.com/nairobi-gophers/fupisha/store"
+	"github.com/nairobi-gophers/fupisha/store/mock"
 )
 
 func TestHandleSignup(t *testing.T) {

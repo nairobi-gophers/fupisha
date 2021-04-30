@@ -9,8 +9,8 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/lib/pq"
-	"github.com/nairobi-gophers/fupisha/internal/logging"
-	"github.com/nairobi-gophers/fupisha/internal/provider"
+	"github.com/nairobi-gophers/fupisha/logging"
+	"github.com/nairobi-gophers/fupisha/provider"
 	"github.com/sirupsen/logrus"
 )
 

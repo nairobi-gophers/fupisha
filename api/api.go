@@ -11,9 +11,9 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
 	"github.com/nairobi-gophers/fupisha/api/v1/auth"
-	"github.com/nairobi-gophers/fupisha/internal/config"
-	"github.com/nairobi-gophers/fupisha/internal/logging"
-	"github.com/nairobi-gophers/fupisha/internal/store"
+	"github.com/nairobi-gophers/fupisha/config"
+	"github.com/nairobi-gophers/fupisha/logging"
+	"github.com/nairobi-gophers/fupisha/store"
 )
 
 //New configures application resources and routers.
