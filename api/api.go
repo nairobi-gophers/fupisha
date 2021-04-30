@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
 	"github.com/nairobi-gophers/fupisha/api/v1/auth"
+	"github.com/nairobi-gophers/fupisha/api/v1/url"
 	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/nairobi-gophers/fupisha/logging"
 	"github.com/nairobi-gophers/fupisha/store"
@@ -21,6 +22,7 @@ func New(enableCORS bool, cfg *config.Config, store store.Store) (*chi.Mux, erro
 	logger := logging.NewLogger(cfg)
 
 	authResource := auth.NewResource(store, cfg)
+	urlResource := url.NewResource(store, cfg)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
@@ -38,6 +40,7 @@ func New(enableCORS bool, cfg *config.Config, store store.Store) (*chi.Mux, erro
 	}
 
 	r.Mount("/auth", authResource.Router())
+	r.Mount("/url", urlResource.Router())
 
 	r.Get("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "User-agent: *\nDisallow: /")
