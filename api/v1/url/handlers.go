@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/go-ozzo/ozzo-validation/is"
+	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -36,14 +37,14 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uid, ok := auth.FromContext(r.Context())
+	id, ok := auth.FromContext(r.Context())
 	if !ok {
 		log(r).Error(errors.New("could not extract userID from context"))
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
-	userID, err := encoding.Decode(uid)
+	userID, err := uuid.FromString(id)
 	if err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
@@ -58,7 +59,13 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	link := Shorten(body.URL, rs.Config.BaseURL, rs.Config.ParamLength)
+	link, err := Shorten(body.URL, rs.Config.BaseURL, rs.Config.ParamLength)
+
+	if err != nil {
+		log(r).Error(err)
+		render.Render(w, r, ErrInternalServerError)
+		return
+	}
 
 	//Insert the shortened url in the database
 	_, err = rs.Store.Urls().New(r.Context(), userID, body.URL, link)
@@ -74,15 +81,21 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 		Link: link,
 	}
 
+	render.Status(r, http.StatusCreated)
 	render.Respond(w, r, &resBody)
 }
 
 //Shorten shortens a long url string
-func Shorten(originalURL, baseURL string, len int) string {
+func Shorten(originalURL, baseURL string, len int) (string, error) {
 	if !strings.HasSuffix(baseURL, "/") {
 		baseURL += "/"
 	}
-	return baseURL + encoding.GenUniqueParam("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", len)
+	param, err := encoding.GenUniqueParam("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", len)
+	if err != nil {
+		return "", err
+	}
+
+	return baseURL + param, nil
 }
 
 func log(r *http.Request) logrus.FieldLogger {
