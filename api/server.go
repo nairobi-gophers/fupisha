@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/nairobi-gophers/fupisha/config"
 )
@@ -52,8 +53,8 @@ func (srv *Server) Start() {
 	}()
 	log.Printf("Listening on %s\n", srv.Addr)
 
-	quit := make(chan os.Signal)
-	signal.Notify(quit, os.Interrupt)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	sig := <-quit
 	log.Println("Shutting down fupisha API server... Reason:", sig)
 
