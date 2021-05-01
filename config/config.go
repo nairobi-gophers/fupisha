@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -93,7 +92,7 @@ type Config struct {
 //GetStore returns a connection to the relevant database as specified on the config
 func (cfg *Config) GetStore() (store.Store, error) {
 	switch cfg.Store.Type {
-	case "postgresql":
+	case "postgresql": //rid the switch statement altogether
 		var (
 			address  = cfg.Store.PostgreSQL.Address
 			username = cfg.Store.PostgreSQL.Username
@@ -101,11 +100,7 @@ func (cfg *Config) GetStore() (store.Store, error) {
 			database = cfg.Store.PostgreSQL.Database
 		)
 
-		if (address == "") || (username == "") || (database == "") || (password == "") {
-			err := errors.New("missing postgresql configuration variable")
-			log.Fatalf("config: %s", err.Error())
-		}
-		// address := fmt.Sprintf("%s:%s", host, port)
+		//Pass the cfg.Store.PostgreSQL struct instead of four variables.
 		return postgres.Connect(
 			address,
 			username,
