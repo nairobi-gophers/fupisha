@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func newTestDatabase(tb testing.TB) (*Store, error) {
-	tb.Helper()
+func newTestDatabase(t *testing.T) (*Store, error) {
+	t.Helper()
 
 	ctx := context.Background()
 
@@ -27,7 +27,7 @@ func newTestDatabase(tb testing.TB) (*Store, error) {
 
 	db := testContainer.Connect()
 
-	tb.Cleanup(func() {
+	t.Cleanup(func() {
 
 		//close connection
 		db.Close()
@@ -51,11 +51,11 @@ func newTestDatabase(tb testing.TB) (*Store, error) {
 	tearDown := func() {
 		err := s.Drop()
 		if err != nil {
-			tb.Fatal(err)
+			t.Fatal(err)
 		}
 	}
 
-	tb.Cleanup(tearDown)
+	t.Cleanup(tearDown)
 
 	return s, nil
 }
