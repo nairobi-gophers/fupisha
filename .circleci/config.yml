@@ -1,0 +1,26 @@
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:202007-01
+    steps:
+      - checkout
+      - run:
+          name: Install Go 1.15.11
+          command: |
+            sudo rm -rf /usr/local/go
+            wget https://golang.org/dl/go1.15.11.linux-amd64.tar.gz
+            sudo tar -C /usr/local -xzf go1.15.11.linux-amd64.tar.gz
+            which go
+            go version
+      - run:
+          name: Install Dependencies
+          command: |
+            go mod download
+            go mod verify
+      - run:
+          name: Run vet
+          command: go vet ./...
+      - run:
+          name: Run tests
+          command: go test -v ./...
