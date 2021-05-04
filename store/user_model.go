@@ -12,9 +12,9 @@ type User struct {
 	ID                   uuid.UUID  `db:"id,omitempty"`
 	Email                string     `db:"email,omitempty"`
 	Password             string     `db:"password"`
-	APIKey               uuid.UUID  `db:"api_key,omitempty"`
+	APIKey               *uuid.UUID `db:"api_key,omitempty"`
 	ResetPasswordExpires *time.Time `db:"reset_password_expires,omitempty"`
-	ResetPasswordToken   *string    `db:"reset_password_token,omitempty"`
+	ResetPasswordToken   *uuid.UUID `db:"reset_password_token,omitempty"`
 	VerificationExpires  time.Time  `db:"verification_expires"`
 	VerificationToken    uuid.UUID  `db:"verification_token,omitempty"`
 	Verified             bool       `db:"verified,omitempty"`
