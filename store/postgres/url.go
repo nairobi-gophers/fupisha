@@ -34,15 +34,15 @@ func (u *urlStore) New(ctx context.Context, userID uuid.UUID, originalURL, short
 		UpdatedAt:    now,
 	}
 
-	const q = `INSERT INTO urls (id,owner,original_url,short_url,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6)`
+	var ur store.URL
 
-	_, err := u.db.ExecContext(ctx, q, url.ID, url.Owner, url.OriginalURL, url.ShortenedURL, url.CreatedAt, url.UpdatedAt)
+	const q = `INSERT INTO urls (id,owner,original_url,short_url,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6) returning id,owner,original_url,short_url,created_at,updated_at`
 
-	if err != nil {
+	if err := u.db.QueryRowContext(ctx, q, url.ID, url.Owner, url.OriginalURL, url.ShortenedURL, url.CreatedAt, url.UpdatedAt).Scan(&ur.ID, &ur.Owner, &ur.OriginalURL, &ur.ShortenedURL, &ur.CreatedAt, &ur.UpdatedAt); err != nil {
 		return store.URL{}, errors.Wrap(err, "inserting new url")
 	}
 
-	return url, nil
+	return ur, nil
 }
 
 func (u *urlStore) Get(ctx context.Context, id uuid.UUID) (store.URL, error) {
@@ -50,9 +50,19 @@ func (u *urlStore) Get(ctx context.Context, id uuid.UUID) (store.URL, error) {
 
 	const q = `SELECT * FROM urls WHERE id=$1`
 
-	_, err := u.db.ExecContext(ctx, q, id, &u)
-	if err != nil {
+	if err := u.db.GetContext(ctx, &url, q, id); err != nil {
 		return store.URL{}, errors.Wrap(err, "retrieving url by id")
+	}
+
+	return url, nil
+}
+
+func (u *urlStore) GetByParam(ctx context.Context, param string) (store.URL, error) {
+	var url store.URL
+
+	const q = `SELECT * FROM urls WHERE short_url=$1`
+	if err := u.db.GetContext(ctx, &url, q, param); err != nil {
+		return store.URL{}, errors.Wrap(err, "retrieving url by param")
 	}
 
 	return url, nil
