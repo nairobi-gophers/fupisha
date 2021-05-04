@@ -22,6 +22,8 @@ func (s userStore) New(ctx context.Context, email, password string) (store.User,
 
 	var now time.Time = time.Now()
 
+	var u store.User
+
 	user := store.User{
 		ID:                  encoding.GenUniqueID(),
 		Email:               email,
@@ -36,9 +38,10 @@ func (s userStore) New(ctx context.Context, email, password string) (store.User,
 		return store.User{}, err
 	}
 
-	const q = `INSERT INTO users(id,email,password,verification_token,verification_expires,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`
+	const q = `INSERT INTO users(id,email,password,verification_token,verification_expires,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)
+	returning id,email,password,verification_token,verification_expires,created_at,updated_at`
 
-	if _, err := s.db.ExecContext(ctx, q, user.ID, user.Email, user.Password, user.VerificationToken, user.VerificationExpires, user.CreatedAt, user.UpdatedAt); err != nil {
+	if err := s.db.QueryRowContext(ctx, q, user.ID, user.Email, user.Password, user.VerificationToken, user.VerificationExpires, user.CreatedAt, user.UpdatedAt).Scan(&u.ID, &u.Email, &u.Password, &u.VerificationToken, &u.VerificationExpires, &u.CreatedAt, &u.UpdatedAt); err != nil {
 		return store.User{}, errors.Wrap(err, "inserting new user")
 	}
 
@@ -78,7 +81,7 @@ func (s userStore) GetByEmail(ctx context.Context, email string) (store.User, er
 func (s userStore) SetAPIKey(ctx context.Context, id, key uuid.UUID) error {
 	user := store.User{
 		ID:     id,
-		APIKey: key,
+		APIKey: &key,
 	}
 
 	const q = `UPDATE users SET api_key=$1 WHERE id=$2`
