@@ -164,7 +164,7 @@ func TestHandleLogin(t *testing.T) {
 						Email:               "parish@fupisha.io",
 						Password:            "str0ngpa55w0rd",
 						CreatedAt:           testTime,
-						APIKey:              testKey,
+						APIKey:              &testKey,
 						VerificationExpires: testTime.Add(time.Minute * 60),
 						VerificationToken:   testKey,
 					}
@@ -185,7 +185,7 @@ func TestHandleLogin(t *testing.T) {
 						Email:               "parish@fupisha.io",
 						Password:            "str0ngpa55w0rd",
 						CreatedAt:           testTime,
-						APIKey:              testKey,
+						APIKey:              &testKey,
 						VerificationExpires: testTime.Add(time.Minute * 60),
 						VerificationToken:   testKey,
 					}
