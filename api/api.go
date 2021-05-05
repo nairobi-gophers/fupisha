@@ -18,11 +18,11 @@ import (
 )
 
 //New configures application resources and routers.
-func New(enableCORS bool, cfg *config.Config, store store.Store) (*chi.Mux, error) {
+func New(enableCORS bool, cfg *config.Config, s store.Store) (*chi.Mux, error) {
 	logger := logging.NewLogger(cfg)
 
-	authResource := auth.NewResource(store, cfg)
-	urlResource := url.NewResource(store, cfg)
+	authResource := auth.NewResource(s, cfg)
+	urlResource := url.NewResource(s, cfg)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
@@ -41,6 +41,18 @@ func New(enableCORS bool, cfg *config.Config, store store.Store) (*chi.Mux, erro
 
 	r.Mount("/auth", authResource.Router())
 	r.Mount("/url", urlResource.Router())
+
+	//Redirect shortened urls
+	r.Get("/{urlParam}", func(w http.ResponseWriter, r *http.Request) {
+		param := chi.URLParam(r, "urlParam")
+		u, err := s.Urls().GetByParam(r.Context(), param)
+		if err != nil {
+			logging.GetLogEntry(r).WithField("param", param).Error(err)
+			render.Render(w, r, url.ErrInternalServerError)
+			return
+		}
+		http.Redirect(w, r, u.OriginalURL, http.StatusFound)
+	})
 
 	r.Get("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "User-agent: *\nDisallow: /")
