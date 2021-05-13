@@ -9,6 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/ory/dockertest"
 	"github.com/ory/dockertest/docker"
+	"github.com/pkg/errors"
 )
 
 type testConfig struct {
@@ -26,7 +27,7 @@ type PostgresqlContainer struct {
 	opts      testConfig
 }
 
-func NewPostgresqlContainer(pool *dockertest.Pool) PostgresqlContainer {
+func NewPostgresqlContainer(pool *dockertest.Pool) *PostgresqlContainer {
 	opts := testConfig{
 		Host:     "localhost",
 		User:     "testcontainer",
@@ -35,37 +36,42 @@ func NewPostgresqlContainer(pool *dockertest.Pool) PostgresqlContainer {
 		Port:     5432,
 	}
 
-	return PostgresqlContainer{pool: pool, opts: opts, imagename: "postgresql-testcontainer"}
+	return &PostgresqlContainer{pool: pool, opts: opts, imagename: "postgresql-testcontainer"}
 }
 
-func (container PostgresqlContainer) Create() error {
-	if isRunning(*container.pool, container.imagename) {
-		return nil
-	}
+func (container *PostgresqlContainer) Create() (*dockertest.Resource, error) {
+	if !isRunning(*container.pool, container.imagename) {
 
-	dockerOpts := dockertest.RunOptions{
-		Repository: "postgres",
-		Tag:        "latest",
-		Env: []string{
-			"POSTGRES_USER=" + container.opts.User,
-			"POSTGRES_PASSWORD=" + container.opts.Password,
-			"POSTGRES_DB=" + container.opts.Database,
-		},
-		ExposedPorts: []string{strconv.Itoa(container.opts.Port)},
-		PortBindings: map[docker.Port][]docker.PortBinding{
-			docker.Port(strconv.Itoa(container.opts.Port)): {{HostIP: "0.0.0.0", HostPort: strconv.Itoa(container.opts.Port)}},
-		},
-		Name: container.imagename,
-	}
+		dockerOpts := dockertest.RunOptions{
+			Repository: "postgres",
+			Tag:        "latest",
+			Env: []string{
+				"POSTGRES_USER=" + container.opts.User,
+				"POSTGRES_PASSWORD=" + container.opts.Password,
+				"POSTGRES_DB=" + container.opts.Database,
+			},
+			ExposedPorts: []string{strconv.Itoa(container.opts.Port)},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				docker.Port(strconv.Itoa(container.opts.Port)): {{HostIP: "0.0.0.0", HostPort: strconv.Itoa(container.opts.Port)}},
+			},
+			Name: container.imagename,
+		}
 
-	resource, err := container.pool.RunWithOptions(&dockerOpts)
-	if err != nil {
-		log.Fatalf("Could not start resource (Postgresql Test Container): %s", err.Error())
-		return err
-	}
+		resource, err := container.pool.RunWithOptions(&dockerOpts, func(config *docker.HostConfig) {
+			// set AutoRemove to true so that stopped container goes away by itself
+			config.AutoRemove = true
+			config.RestartPolicy = docker.RestartPolicy{
+				Name: "no",
+			}
+		})
+		if err != nil {
+			log.Fatalf("Could not start resource (Postgresql Test Container): %s", err.Error())
+			return nil, err
+		}
 
-	container.resource = resource
-	return nil
+		return resource, nil
+	}
+	return nil, errors.New("container already exists and is running")
 }
 
 func (container PostgresqlContainer) Connect() *sqlx.DB {
