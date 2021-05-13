@@ -21,17 +21,30 @@ func newTestDatabase(t *testing.T) (*Store, error) {
 
 	testContainer := NewPostgresqlContainer(pool)
 
-	if err := testContainer.Create(); err != nil {
+	resource, err := testContainer.Create()
+	if err != nil {
 		return nil, err
 	}
 
+	testContainer.resource = resource
+
+	purgeContainer := func() {
+		//purge the test container
+		if err := pool.Purge(resource); err != nil {
+			t.Fatalf("Could not purge resource: %s", err)
+		}
+	}
+
+	t.Cleanup(purgeContainer)
+
 	db := testContainer.Connect()
 
-	t.Cleanup(func() {
-
+	closeDB := func() {
 		//close connection
 		db.Close()
-	})
+	}
+
+	t.Cleanup(closeDB)
 
 	if err := statusCheck(ctx, db); err != nil {
 		return nil, errors.Wrap(err, "status check database: %s")
