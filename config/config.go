@@ -23,6 +23,8 @@ type Config struct {
 	LogLevel string `envconfig:"FUPISHA_LOG_LEVEL"`
 	//ParamLength length of the shorten url param (https://base_url/{param}) e.g https://fupisha.io/kKIoqRF
 	ParamLength int `envconfig:"FUPISHA_PARAM_LENGTH"`
+	//Port is the port on which the api server will bind to once started e.g 3333
+	Port string `envconfig:"FUPISHA_HTTP_PORT"`
 	//JWT json web token payload
 	JWT struct {
 		//Secret secret jwt signing key.
