@@ -36,7 +36,7 @@ func NewServer() (*Server, error) {
 	}
 
 	srv := http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + cfg.Port,
 		Handler: api,
 	}
 	return &Server{&srv}, nil
