@@ -4,18 +4,21 @@ services:
   fupisha:
     build:
       context: .
+      target: prod
     container_name: api
     depends_on:
       - postgresql
       - redis
     ports:
-      - 8080:8080
+      - ${FUPISHA_HTTP_PORT}:${FUPISHA_HTTP_PORT}
     command:
       ["./main", "start",]
     volumes:
       - ./fupisha:/fupisha
     tty: true
     environment: #loaded from .env file
+      # Golang CGO
+      - CGO_ENABLED=0
       # smtp config 
       - FUPISHA_SMTP_PORT=${FUPISHA_SMTP_PORT}
       - FUPISHA_SMTP_HOST=${FUPISHA_SMTP_HOST}
@@ -39,6 +42,7 @@ services:
       - FUPISHA_LOG_LEVEL=${FUPISHA_LOG_LEVEL}
       - FUPISHA_TEXT_LOGGING=${FUPISHA_TEXT_LOGGING}
       - FUPISHA_PARAM_LENGTH=${FUPISHA_PARAM_LENGTH}
+      - FUPISHA_HTTP_PORT=${FUPISHA_HTTP_PORT}
     networks:
       - fupisha-api
 
