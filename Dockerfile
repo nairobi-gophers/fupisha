@@ -21,11 +21,10 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN go env
 RUN go build -o main ./cmd/
 
-EXPOSE 8080
-
 FROM alpine:3.10 AS prod
+
 RUN apk --no-cache add ca-certificates --upgrade bash
 
-COPY --from=dev /fupisha .
+COPY --from=dev /fupisha/main main
 
 CMD [ "./main" ,"start"]
