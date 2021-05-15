@@ -32,14 +32,30 @@ You need to have Golang installed at the very least `Go 1.11`. The easiest way t
 
 ```
  git clone https://github.com/nairobi-gophers/fupisha.git
-```
+```  
 
-Run the application.
+Rename the `example.env` file to `.env` file and fill in all the config sections, these will be used by the server container to set up the necessary resources.For the smtp section the values must be valid and existing smtp account credentials.   
 
-```
- docker-compose up
-```
+# Run
+To run the application, you will need to ensure that you have the `make` utility installed and running in your local computer.If you have the `make` utility, 
+then you can follow along with the below instructions.  
 
+- Run tests in the container  
+
+    `make tests`
+
+- Start the api server container  
+
+    `make up`
+
+- Stop the api server container 
+
+    `make down`
+
+- Watch the api server container logs
+        
+    `make logs`  
+          
 # Why build this
 
 It will involve the community and awesome technologies like:
