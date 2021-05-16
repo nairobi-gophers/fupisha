@@ -9,6 +9,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/lib/pq"
+	"github.com/nairobi-gophers/fupisha/encoding"
 	"github.com/nairobi-gophers/fupisha/logging"
 	"github.com/nairobi-gophers/fupisha/provider"
 	"github.com/pkg/errors"
@@ -115,7 +116,7 @@ func (rs Resource) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		Token  string `json:"token"`
 	}{
 		Email:  usr.Email,
-		UserID: usr.ID.String(),
+		UserID: encoding.Encode(usr.ID),
 		Token:  token,
 	}
 
