@@ -16,6 +16,7 @@ import (
 	"github.com/nairobi-gophers/fupisha/api/v1/url"
 	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/nairobi-gophers/fupisha/encoding"
+	"github.com/nairobi-gophers/fupisha/logging"
 	"github.com/nairobi-gophers/fupisha/provider"
 	"github.com/nairobi-gophers/fupisha/store"
 	"github.com/nairobi-gophers/fupisha/store/mock"
@@ -127,7 +128,17 @@ func TestHandleShortenURL(t *testing.T) {
 		},
 	}
 
-	apiHandler, err := api.New(false, cfg, store)
+	logger := logging.NewLogger(cfg)
+	logger.SetOutput(ioutil.Discard)
+
+	testCfg := &api.ApiConfig{
+		Logger:     logger,
+		Cfg:        cfg,
+		Store:      store,
+		EnableCORS: false,
+	}
+
+	apiHandler, err := api.New(testCfg)
 	if err != nil {
 		t.Fatal(err)
 	}
