@@ -8,12 +8,12 @@ var migrate = []string{
 		"password" TEXT,
 		api_key UUID,
 		reset_password_token UUID,
-		reset_password_expires TIMESTAMP,
-		verification_expires TIMESTAMP,
+		reset_password_expires TIMESTAMPTZ,
+		verification_expires TIMESTAMPTZ,
 		verification_token UUID,
 		verified BOOLEAN DEFAULT FALSE,
-		created_at TIMESTAMP,
-		updated_at TIMESTAMP
+		created_at TIMESTAMPTZ,
+		updated_at TIMESTAMPTZ
 	);
 
 	CREATE UNIQUE INDEX ON users(email);
@@ -26,8 +26,8 @@ var migrate = []string{
 		original_url TEXT UNIQUE,
 		short_url TEXT,
 		visit_count INTEGER,
-		created_at TIMESTAMP,
-		updated_at TIMESTAMP,
+		created_at TIMESTAMPTZ,
+		updated_at TIMESTAMPTZ,
 		FOREIGN KEY (owner)  REFERENCES users(id) ON DELETE CASCADE
 	);
 
