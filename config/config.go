@@ -94,21 +94,16 @@ type Config struct {
 //GetStore returns a connection to the relevant database as specified on the config
 func (cfg *Config) GetStore() (store.Store, error) {
 	switch cfg.Store.Type {
-	case "postgresql": //rid the switch statement altogether
-		var (
-			address  = cfg.Store.PostgreSQL.Address
-			username = cfg.Store.PostgreSQL.Username
-			password = cfg.Store.PostgreSQL.Password
-			database = cfg.Store.PostgreSQL.Database
-		)
+	case "postgresql":
 
-		//Pass the cfg.Store.PostgreSQL struct instead of four variables.
-		return postgres.Connect(
-			address,
-			username,
-			password,
-			database,
-		)
+		dbCfg := &postgres.Config{
+			Host:     cfg.Store.PostgreSQL.Address,
+			User:     cfg.Store.PostgreSQL.Username,
+			Password: cfg.Store.PostgreSQL.Password,
+			Name:     cfg.Store.PostgreSQL.Database,
+		}
+
+		return postgres.Connect(dbCfg)
 	}
 	return nil, fmt.Errorf("config: unknown store type: %s", cfg.Store.Type)
 }
