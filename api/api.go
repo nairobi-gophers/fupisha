@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -15,27 +14,35 @@ import (
 	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/nairobi-gophers/fupisha/logging"
 	"github.com/nairobi-gophers/fupisha/store"
+	"github.com/sirupsen/logrus"
 )
 
-//New configures application resources and routers.
-func New(enableCORS bool, cfg *config.Config, s store.Store) (*chi.Mux, error) {
-	logger := logging.NewLogger(cfg)
+//ApiConfig declares the required api server dependencies.
+type ApiConfig struct {
+	Logger     *logrus.Logger
+	Cfg        *config.Config
+	Store      store.Store
+	EnableCORS bool
+}
 
-	authResource := auth.NewResource(s, cfg)
-	urlResource := url.NewResource(s, cfg)
+//New configures application resources and routers.
+func New(apiCfg *ApiConfig) (*chi.Mux, error) {
+
+	authResource := auth.NewResource(apiCfg.Store, apiCfg.Cfg)
+	urlResource := url.NewResource(apiCfg.Store, apiCfg.Cfg)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Timeout(15 * time.Second))
-	r.Use(logging.NewStructuredLogger(logger))
+	r.Use(logging.NewStructuredLogger(apiCfg.Logger))
 	r.Use(auth.CheckAPI)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	//Use CORS middleware if client is not served by this api, e.g. from other domain
 	//or CDN
-	if enableCORS {
+	if apiCfg.EnableCORS {
 		r.Use(corsConfig().Handler)
 	}
 
@@ -45,7 +52,7 @@ func New(enableCORS bool, cfg *config.Config, s store.Store) (*chi.Mux, error) {
 	//Redirect shortened urls
 	r.Get("/{urlParam}", func(w http.ResponseWriter, r *http.Request) {
 		param := chi.URLParam(r, "urlParam")
-		u, err := s.Urls().GetByParam(r.Context(), param)
+		u, err := apiCfg.Store.Urls().GetByParam(r.Context(), param)
 		if err != nil {
 			logging.GetLogEntry(r).WithField("param", param).Error(err)
 			render.Render(w, r, url.ErrInternalServerError)
@@ -62,19 +69,19 @@ func New(enableCORS bool, cfg *config.Config, s store.Store) (*chi.Mux, error) {
 		w.Write([]byte("pong"))
 	})
 
-	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
-		route = strings.Replace(route, "/*/", "/", -1)
-		fmt.Printf("%s %s\n", method, route)
-		return nil
-	}
+	// walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+	// 	route = strings.Replace(route, "/*/", "/", -1)
+	// 	fmt.Printf("%s %s\n", method, route)
+	// 	return nil
+	// }
 
-	fmt.Println("[+] API ROUTES ")
+	// fmt.Println("[+] API ROUTES ")
 
-	if err := chi.Walk(r, walkFunc); err != nil {
-		fmt.Printf("walkFunc err:%s\n", err.Error())
-	}
+	// if err := chi.Walk(r, walkFunc); err != nil {
+	// 	fmt.Printf("walkFunc err:%s\n", err.Error())
+	// }
 
-	fmt.Println("[-] API ROUTES")
+	// fmt.Println("[-] API ROUTES")
 
 	return r, nil
 }
