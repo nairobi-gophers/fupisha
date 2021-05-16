@@ -12,14 +12,11 @@ import (
 
 func TestUser(t *testing.T) {
 
-	s, err := newTestDatabase(t)
-	if err != nil {
-		t.Fatal(err)
-	}
+	s, teardown := newTestDatabase(t)
+	defer teardown()
 
 	ctx := context.Background()
 
-	// wantName := "test_user"
 	wantEmail := "test_user@test.com"
 	wantPassword := "test_password"
 
@@ -29,15 +26,18 @@ func TestUser(t *testing.T) {
 		t.Fatalf("failed to create test_user1: %s", err)
 	}
 
-	sinceCreatedAt := time.Since(u.CreatedAt)
-	// fmt.Printf("sinceCreatedAt: %v, createdAt:%v", sinceCreatedAt, u.CreatedAt)
+	got, err := s.Users().GetByEmail(ctx, wantEmail)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	if sinceCreatedAt > 3*time.Second {
-		t.Fatalf("bad user.CreatedAt: %v", u.CreatedAt)
+	sinceCreatedAt := time.Since(got.CreatedAt)
+
+	if sinceCreatedAt > 3*time.Second || sinceCreatedAt < 0 {
+		t.Fatalf("bad user.CreatedAt: %v", got.CreatedAt)
 	}
 
 	beforeVerificationExpiry := time.Until(u.VerificationExpires)
-
 	//We are checking how many minutes we have until the verification token expires.
 	//It cannot be 60 since some seconds elapse between creating the token and the point at which we are verifying it.
 	//It should be less than 60.
@@ -52,17 +52,18 @@ func TestUser(t *testing.T) {
 		ResetPasswordToken:   u.ResetPasswordToken,
 		VerificationExpires:  u.VerificationExpires,
 		VerificationToken:    u.VerificationToken,
-		Verified:             false,
+		Verified:             u.Verified,
 		Password:             u.Password,
 		CreatedAt:            u.CreatedAt,
 		UpdatedAt:            u.UpdatedAt,
 	}
 
-	if !reflect.DeepEqual(u, want) {
-		t.Fatalf("got %+v want %+v", u, want)
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %+v want %+v", got, want)
 	}
 
-	if _, err := u.Compare(u.Password, wantPassword); err != nil {
+	if _, err := got.Compare(got.Password, wantPassword); err != nil {
 		t.Fatalf("failed to compare password: %s", err)
 	}
+
 }
