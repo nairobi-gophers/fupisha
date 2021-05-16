@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/nairobi-gophers/fupisha/config"
+	"github.com/nairobi-gophers/fupisha/logging"
 )
 
 //Server defines our server dependencies
@@ -24,13 +25,22 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
+	logger := logging.NewLogger(cfg)
+
 	store, err := cfg.GetStore()
 
 	if err != nil {
 		return nil, err
 	}
 
-	api, err := New(true, cfg, store)
+	apiCfg := &ApiConfig{
+		Logger:     logger,
+		Store:      store,
+		Cfg:        cfg,
+		EnableCORS: false,
+	}
+
+	api, err := New(apiCfg)
 	if err != nil {
 		return nil, err
 	}
