@@ -3,26 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/nairobi-gophers/fupisha/api"
 	"github.com/nairobi-gophers/fupisha/config"
 )
 
-var (
-	logger       = log.New(os.Stdout, "", log.LstdFlags|log.LUTC)
-	useEnvConfig = flag.Bool("e", false, "use environment variables as config")
-)
-
 func main() {
 	flag.Usage = help
 	flag.Parse()
 
-	// router := chi.NewRouter()
 	api, err := api.NewServer()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	cmds := map[string]func(){
@@ -43,6 +37,6 @@ func help() {
 	fmt.Fprintln(os.Stderr, `
 	Usage: 
 	  fupisha start		- start the server
-	  fupisha key			- generate a random 32-byte hex-encoded key         
+	  fupisha key		- generate a random 32-byte hex-encoded key         
 	 `)
 }
