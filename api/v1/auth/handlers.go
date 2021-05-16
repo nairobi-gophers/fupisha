@@ -11,6 +11,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/nairobi-gophers/fupisha/logging"
 	"github.com/nairobi-gophers/fupisha/provider"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -52,8 +53,7 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	_, err := rs.Store.Users().New(r.Context(), body.Email, body.Password)
 
 	if err != nil {
-
-		if pqErr, ok := err.(*pq.Error); ok {
+		if pqErr, ok := errors.Cause(err).(*pq.Error); ok {
 			//If its a unique key violation
 			if pqErr.Code == pq.ErrorCode("23505") {
 				log(r).WithField("email", body.Email).Error(err)
