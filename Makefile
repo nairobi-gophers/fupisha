@@ -5,8 +5,7 @@ include .env
 # Running tests together with the staticcheck within the local computer
 
 test:
-	go clean -testcache
-	CGO_ENABLED=0 go test -v ./... 
+	CGO_ENABLED=0 go test -v ./... -count=1
 	CGO_ENABLED=0 staticcheck ./...
 
 # ==============================================================================
