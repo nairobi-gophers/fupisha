@@ -6,24 +6,22 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/ory/dockertest/v3"
-	"github.com/pkg/errors"
 )
 
-func newTestDatabase(t *testing.T) (*Store, error) {
-	t.Helper()
+func newTestDatabase(t *testing.T) (*Store, func()) {
 
 	ctx := context.Background()
 
 	pool, err := dockertest.NewPool("")
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
 
 	testContainer := NewPostgresqlContainer(pool)
 
 	resource, err := testContainer.Create()
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
 
 	testContainer.resource = resource
@@ -34,41 +32,42 @@ func newTestDatabase(t *testing.T) (*Store, error) {
 			t.Fatalf("Could not purge resource: %s", err)
 		}
 	}
-
-	t.Cleanup(purgeContainer)
-
-	db := testContainer.Connect()
-
-	closeDB := func() {
-		//close connection
-		db.Close()
+	opts := &Config{
+		Host:       "localhost:5432",
+		User:       "testcontainer",
+		Password:   "Aa123456.",
+		Name:       "testcontainer",
+		DisableTLS: true,
 	}
 
-	t.Cleanup(closeDB)
-
-	if err := statusCheck(ctx, db); err != nil {
-		return nil, errors.Wrap(err, "status check database: %s")
+	s, err := Connect(opts)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	s := &Store{
-		db:        db,
-		userStore: &userStore{db: db},
-		urlStore:  &urlStore{db: db},
+	if err := statusCheck(ctx, s.db); err != nil {
+		t.Fatalf("status check database: %s", err)
 	}
 
-	if err := s.Migrate(); err != nil {
-		return nil, errors.Wrap(err, "failed to migrate database")
+	closedb := func() {
+		//close database connection
+		s.db.Close()
 	}
 
-	//tear down a table.
-	tearDown := func() {
+	dropdb := func() {
+		//drop the database
 		err := s.Drop()
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
+	//tear down a table.
+	teardown := func() {
+		t.Helper()
+		dropdb()
+		closedb()
+		purgeContainer()
+	}
 
-	t.Cleanup(tearDown)
-
-	return s, nil
+	return s, teardown
 }
