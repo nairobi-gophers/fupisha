@@ -1,12 +1,10 @@
 package postgres
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/pkg/errors"
@@ -72,26 +70,6 @@ func (container *PostgresqlContainer) Create() (*dockertest.Resource, error) {
 		return resource, nil
 	}
 	return nil, errors.New("container already exists and is running")
-}
-
-func (container PostgresqlContainer) Connect() *sqlx.DB {
-	var db *sqlx.DB
-	if err := container.pool.Retry(func() error {
-		defaultDsn := "host=%s user=%s password=%s dbname=%s port=%d sslmode=disable"
-		dsn := fmt.Sprintf(defaultDsn, container.opts.Host, container.opts.User, container.opts.Password, container.opts.Database, container.opts.Port)
-
-		var err error
-		db, err = sqlx.Open("postgres", dsn)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
-		log.Fatalf("Could not connect to docker: %s", err)
-	}
-
-	return db
 }
 
 func isRunning(pool dockertest.Pool, imagename string) bool {
