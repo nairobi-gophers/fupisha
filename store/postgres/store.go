@@ -61,9 +61,26 @@ func (s *Store) Reset() error {
 
 var _ store.Store = (*Store)(nil) //Validate that store object actually points to something.
 
+type Config struct {
+	//Host e.g. localhost:5432
+	Host string
+	//Password is the database user's password
+	Password string
+	//User is the database username
+	User string
+	//Name is the database name
+	Name string
+	//MaxIdleConns is the maximum number of conns in the idle conn pool
+	MaxIdleConns int
+	//MaxOpenConns is the maximum number of open conns to the database.
+	MaxOpenConns int
+	//DisableTLS enable TLS on connections to the database.
+	DisableTLS bool
+}
+
 //Connect connects to a postgres store and returns an initialized postgres store object.
 //address: localhost:5432
-func Connect(address, username, password, database string) (*Store, error) {
+func Connect(cfg *Config) (*Store, error) {
 	sslMode := "disable" //Should be set in the config object
 	q := make(url.Values)
 	q.Set("sslmode", sslMode)
@@ -72,9 +89,9 @@ func Connect(address, username, password, database string) (*Store, error) {
 
 	u := url.URL{
 		Scheme:   "postgres",
-		User:     url.UserPassword(username, password),
-		Host:     address,
-		Path:     database,
+		User:     url.UserPassword(cfg.User, cfg.Password),
+		Host:     cfg.Host,
+		Path:     cfg.Name,
 		RawQuery: q.Encode(),
 	}
 
@@ -82,6 +99,9 @@ func Connect(address, username, password, database string) (*Store, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "connecting to database")
 	}
+
+	db.SetMaxIdleConns(cfg.MaxIdleConns)
+	db.SetMaxOpenConns(cfg.MaxOpenConns)
 
 	if err := statusCheck(context.Background(), db); err != nil {
 		return nil, errors.Wrap(err, "connect: connection never ready")
