@@ -14,6 +14,7 @@ import (
 	"github.com/nairobi-gophers/fupisha/api"
 	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/nairobi-gophers/fupisha/encoding"
+	"github.com/nairobi-gophers/fupisha/logging"
 	"github.com/nairobi-gophers/fupisha/store"
 	"github.com/nairobi-gophers/fupisha/store/mock"
 )
@@ -43,27 +44,41 @@ func TestHandleSignup(t *testing.T) {
 		},
 	}
 
-	apiHandler, err := api.New(true, cfg, store)
+	logger := logging.NewLogger(cfg)
+	logger.SetOutput(ioutil.Discard)
+
+	testCfg := &api.ApiConfig{
+		Logger:     logger,
+		Cfg:        cfg,
+		Store:      store,
+		EnableCORS: false,
+	}
+
+	apiHandler, err := api.New(testCfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	tests := []struct {
+		desc     string
 		body     string
 		wantCode int
 		wantBody string
 	}{
 		{
+			desc:     "Create a new user",
 			body:     `{"email":"parish@fupisha.io","password":"str0ngpa55w0rd"}`,
 			wantCode: http.StatusCreated,
 			wantBody: `{}`,
 		},
 		{
+			desc:     "Create a new user with an invalid password",
 			body:     `{"email":"admin@fupisha.io","password":"str0ngpa55w0rd_"}`,
 			wantCode: http.StatusUnprocessableEntity,
 			wantBody: `{"status":"Unprocessable Entity","error":"password: must contain English letters and digits only."}`,
 		},
 		{
+			desc:     "Create a new user with an invalid email",
 			body:     `{"email":"invalid@fupisha","password":"str0ngpa55w0rd"}`,
 			wantCode: http.StatusUnprocessableEntity,
 			wantBody: `{"status":"Unprocessable Entity","error":"email: must be a valid email address."}`,
@@ -84,6 +99,7 @@ func TestHandleSignup(t *testing.T) {
 		rr := httptest.NewRecorder()
 		apiHandler.ServeHTTP(rr, req)
 
+		t.Logf("%s\n", tc.desc)
 		if tc.wantCode != rr.Code {
 			t.Fatalf("handler returned unexpected status code: want status code %d got %d", tc.wantCode, rr.Code)
 		}
@@ -200,7 +216,17 @@ func TestHandleLogin(t *testing.T) {
 		},
 	}
 
-	apiHandler, err := api.New(false, cfg, store)
+	logger := logging.NewLogger(cfg)
+	logger.SetOutput(ioutil.Discard)
+
+	testCfg := &api.ApiConfig{
+		Logger:     logger,
+		Cfg:        cfg,
+		Store:      store,
+		EnableCORS: false,
+	}
+
+	apiHandler, err := api.New(testCfg)
 	if err != nil {
 		t.Fatal(err)
 	}
