@@ -52,7 +52,7 @@ func (s userStore) New(ctx context.Context, email, password string) (store.User,
 func (s userStore) Get(ctx context.Context, id uuid.UUID) (store.User, error) {
 	user := store.User{}
 
-	const q = `SELECT id,name,email,api_key,created_at,verified FROM users WHERE id=$1`
+	const q = `SELECT id,email,password,verification_token,verified,verification_expires,created_at,updated_at FROM users WHERE id=$1`
 
 	if err := s.db.GetContext(ctx, &user, q, id); err != nil {
 		if err == sql.ErrNoRows {
@@ -68,7 +68,7 @@ func (s userStore) Get(ctx context.Context, id uuid.UUID) (store.User, error) {
 func (s userStore) GetByEmail(ctx context.Context, email string) (store.User, error) {
 	user := store.User{}
 
-	const q = `SELECT id,name,email,api_key,created_at,verified FROM users WHERE email=$1`
+	const q = `SELECT id,email,password,verification_token,verified,verification_expires,created_at,updated_at FROM users WHERE email=$1`
 
 	if err := s.db.GetContext(ctx, &user, q, email); err != nil {
 		return user, errors.Wrap(err, "retrieving user by email")
