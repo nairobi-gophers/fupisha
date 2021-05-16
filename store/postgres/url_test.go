@@ -10,10 +10,8 @@ import (
 )
 
 func TestURL(t *testing.T) {
-	s, err := newTestDatabase(t)
-	if err != nil {
-		t.Fatal(err)
-	}
+	s, teardown := newTestDatabase(t)
+	defer teardown()
 
 	ctx := context.Background()
 
