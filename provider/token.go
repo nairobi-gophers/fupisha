@@ -63,7 +63,7 @@ func (s *service) Decode(tokenString string) (string, time.Time, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("jwt: unexpected signing method : %v", token.Header["alg"])
 		}
-		return s.cfg.JWT.Secret, nil
+		return []byte(s.cfg.JWT.Secret), nil
 	})
 
 	var uid string
