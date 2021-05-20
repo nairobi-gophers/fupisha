@@ -5,15 +5,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nairobi-gophers/fupisha/encoding"
+	"github.com/nairobi-gophers/fupisha/config"
 )
 
 func TestEncodeDecode(t *testing.T) {
 	userID := "5d0575344d9f7ff15e989174"
 
-	secret := encoding.GenHexKey(32)
+	cfg, err := config.New()
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	s, err := NewJWTService(secret)
+	s, err := NewJWTService(cfg)
 	if err != nil {
 		t.Fatalf("failed to create a new service: %s", err)
 	}
@@ -39,14 +42,15 @@ func TestEncodeDecode(t *testing.T) {
 	}
 
 	badSecret := strings.Repeat("1", 64)
+	cfg.JWT.Secret = badSecret
 
-	s, err = NewJWTService(badSecret)
+	s, err = NewJWTService(cfg)
 	if err != nil {
 		t.Fatalf("failed to create a new service: %s", err)
 	}
 
 	_, _, err = s.Decode(tokenString)
 	if err == nil {
-		t.Fatalf("no error on decoding with bad secret")
+		t.Fatalf("should error when decoding token using a invalid secret")
 	}
 }
