@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/hex"
 	"net/http"
 	"strings"
 
@@ -95,8 +94,7 @@ func (rs Resource) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	secret := hex.EncodeToString([]byte(rs.Config.JWT.Secret))
-	jwtService, err := provider.NewJWTService(secret)
+	jwtService, err := provider.NewJWTService(rs.Config)
 	if err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
