@@ -16,25 +16,24 @@ type JWTService interface {
 }
 
 type service struct {
-	secret []byte
-	cfg    config.Config
+	cfg *config.Config
 }
 
 // Claims is our custom metadata, which will be hashed
 // and sent as the second segment in our JWT.
 type Claims struct {
 	jwt.StandardClaims
-	UserID string
+	UserID string `json:"_uid"`
 }
 
 //NewJWTService configures and returns a JWT authentication instance.
-func NewJWTService(secret string) (JWTService, error) {
+func NewJWTService(cfg *config.Config) (JWTService, error) {
 
-	if len([]byte(secret)) < 32 {
+	if len(cfg.JWT.Secret) < 32 {
 		return nil, errors.New("jwt: secret too short")
 	}
 
-	return &service{secret: []byte(secret)}, nil
+	return &service{cfg}, nil
 }
 
 // Encode a claim into a JWT
@@ -54,17 +53,17 @@ func (s *service) Encode(uid string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 
 	// Sign token and return
-	return token.SignedString(s.secret)
+	return token.SignedString([]byte(s.cfg.JWT.Secret))
 }
 
 //Decode verifies the JWT string using the given secret key,
 //on success it decodes it and returns the user ID string.
-func (s *service) Decode(tkn string) (string, time.Time, error) {
-	tokenType, err := jwt.ParseWithClaims(tkn, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func (s *service) Decode(tokenString string) (string, time.Time, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("jwt: unexpected signing method")
+			return nil, fmt.Errorf("jwt: unexpected signing method : %v", token.Header["alg"])
 		}
-		return s.secret, nil
+		return s.cfg.JWT.Secret, nil
 	})
 
 	var uid string
@@ -73,7 +72,10 @@ func (s *service) Decode(tkn string) (string, time.Time, error) {
 		return uid, time.Time{}, fmt.Errorf("jwt: ParseWithClaims failed: %w", err)
 	}
 
-	c, ok := tokenType.Claims.(*Claims)
+	if !token.Valid {
+		return uid, time.Time{}, errors.New("jwt: token is not valid")
+	}
+	c, ok := token.Claims.(*Claims)
 	if !ok {
 		return uid, time.Time{}, errors.New("jwt: failed to get token claims")
 	}
