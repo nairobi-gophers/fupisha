@@ -35,10 +35,9 @@ func Verifier(cfg *config.Config) func(next http.Handler) http.Handler {
 				}
 				token := authHeader[7:]
 
-				secret := cfg.JWT.Secret
-				service, err := provider.NewJWTService(secret)
+				service, err := provider.NewJWTService(cfg)
 				if err != nil {
-					log(r).WithField("secret", secret).Error(err)
+					log(r).WithField("secret", cfg.JWT.Secret).Error(err)
 					render.Render(w, r, ErrInternalServerError)
 					return
 				}
