@@ -62,7 +62,7 @@ func TestHandleShortenURL(t *testing.T) {
 		cfg.JWT.ExpireDelta = 6
 	}
 
-	jwtService, err := provider.NewJWTService(cfg.JWT.Secret)
+	jwtService, err := provider.NewJWTService(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
