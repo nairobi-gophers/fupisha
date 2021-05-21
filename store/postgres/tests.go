@@ -8,7 +8,7 @@ import (
 	"github.com/ory/dockertest/v3"
 )
 
-func newTestDatabase(t *testing.T) (*Store, func()) {
+func NewTestDatabase(t *testing.T) (*Store, func()) {
 
 	ctx := context.Background()
 
