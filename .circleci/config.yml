@@ -3,6 +3,7 @@ jobs:
   build:
     machine:
       image: ubuntu-1604:202007-01
+    working_directory: ~/fupisha
     steps:
       - checkout
       - run:
@@ -22,5 +23,8 @@ jobs:
           name: Run vet
           command: go vet ./...
       - run:
-          name: Run tests
-          command: go test -v ./...
+          name: Run unit tests
+          command: go test -v ~/fupisha/store/postgres/ 
+      - run:
+          name: Run integration tests
+          command: go test -v ~/fupisha/api/v1/tests/ 
