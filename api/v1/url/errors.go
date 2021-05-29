@@ -51,6 +51,16 @@ func ErrInvalidRequest(err error) render.Renderer {
 	}
 }
 
+//ErrURLNotFound returns status 404 Not Found including error message.
+func ErrURLNotFound(err error) render.Renderer {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: http.StatusNotFound,
+		StatusText:     http.StatusText(http.StatusNotFound),
+		ErrorText:      err.Error(),
+	}
+}
+
 // The list of default error types without specific error message.
 var (
 	ErrInternalServerError = &ErrResponse{
