@@ -12,8 +12,8 @@ import (
 
 func TestUser(t *testing.T) {
 
-	s, teardown := newTestDatabase(t)
-	defer teardown()
+	s, teardown := NewTestDatabase(t)
+	t.Cleanup(teardown)
 
 	ctx := context.Background()
 
