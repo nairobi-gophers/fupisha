@@ -1,12 +1,23 @@
-SHELL:=/bin/bash                    
+SHELL:=/bin/bash                  
 include .env
 
 # ==============================================================================
 # Running tests together with the staticcheck within the local computer
+integration-test:
+				@echo "++++ Run integration tests ++++"
+				@CGO_ENABLED=0 go test -v ./api/v1/tests/ -count=1 
+				@CGO_ENABLED=0 staticcheck ./...
+				
+unit-test:
+		@echo "++++ Run unit tests ++++"
+		@CGO_ENABLED=0 go test -v ./encoding/ -count=1 
+		@CGO_ENABLED=0 staticcheck ./encoding/
+		@CGO_ENABLED=0 go test -v ./store/ -count=1 
+		@CGO_ENABLED=0 staticcheck ./store/
+		
 
-test:
-	CGO_ENABLED=0 go test -v ./... -count=1
-	CGO_ENABLED=0 staticcheck ./...
+
+test:unit-test integration-test 
 
 # ==============================================================================
 	
