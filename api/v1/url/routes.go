@@ -10,6 +10,7 @@ func (rs *Resource) Router() *chi.Mux {
 	r := chi.NewRouter()
 	r.Group(func(r chi.Router) {
 		r.Use(auth.Verifier(rs.Config))
+		r.Use(auth.CheckAPI)
 		r.Post("/shorten", rs.HandleShortenURL)
 	})
 
