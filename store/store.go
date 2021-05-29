@@ -25,4 +25,5 @@ type URLStore interface {
 	New(ctx context.Context, userID uuid.UUID, originalURL, shortenedURL string) (URL, error)
 	Get(ctx context.Context, id uuid.UUID) (URL, error)
 	GetByParam(ctx context.Context, param string) (URL, error)
+	GetByURL(ctx context.Context, longURL string) (URL, error)
 }
