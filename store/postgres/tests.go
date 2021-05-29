@@ -19,16 +19,12 @@ func NewTestDatabase(t *testing.T) (*Store, func()) {
 
 	testContainer := NewPostgresqlContainer(pool)
 
-	resource, err := testContainer.Create()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	testContainer.resource = resource
+	testContainer.Create(t)
 
 	purgeContainer := func() {
+		t.Logf("Purging test container...")
 		//purge the test container
-		if err := pool.Purge(resource); err != nil {
+		if err := testContainer.resource.Close(); err != nil {
 			t.Fatalf("Could not purge resource: %s", err)
 		}
 	}
@@ -50,11 +46,13 @@ func NewTestDatabase(t *testing.T) (*Store, func()) {
 	}
 
 	closedb := func() {
+		t.Log("Closing database connection...")
 		//close database connection
 		s.db.Close()
 	}
 
 	dropdb := func() {
+		t.Log("Dropping database...")
 		//drop the database
 		err := s.Drop()
 		if err != nil {
