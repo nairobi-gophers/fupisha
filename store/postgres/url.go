@@ -67,3 +67,15 @@ func (u *urlStore) GetByParam(ctx context.Context, param string) (store.URL, err
 
 	return url, nil
 }
+
+//GetByURL retrieves the short url of the given long url.
+func (u *urlStore) GetByURL(ctx context.Context, longURL string) (store.URL, error) {
+	var url store.URL
+
+	const q = `SELECT * FROM urls WHERE original_url=$1`
+	if err := u.db.GetContext(ctx, &url, q, longURL); err != nil {
+		return store.URL{}, errors.Wrap(err, "retrieving short url by long url")
+	}
+
+	return url, nil
+}
