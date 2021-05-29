@@ -12,8 +12,8 @@ unit-test:
 		@echo "++++ Run unit tests ++++"
 		@CGO_ENABLED=0 go test -v ./encoding/ -count=1 
 		@CGO_ENABLED=0 staticcheck ./encoding/
-		@CGO_ENABLED=0 go test -v ./store/ -count=1 
-		@CGO_ENABLED=0 staticcheck ./store/
+		@CGO_ENABLED=0 go test -v ./store/postgres/ -count=1 
+		@CGO_ENABLED=0 staticcheck ./store/postgres/
 		
 
 
