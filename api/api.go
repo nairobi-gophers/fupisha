@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -37,7 +38,6 @@ func New(apiCfg *ApiConfig) (*chi.Mux, error) {
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.Timeout(15 * time.Second))
 	r.Use(logging.NewStructuredLogger(apiCfg.Logger))
-	r.Use(auth.CheckAPI)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	//Use CORS middleware if client is not served by this api, e.g. from other domain
@@ -55,7 +55,7 @@ func New(apiCfg *ApiConfig) (*chi.Mux, error) {
 		u, err := apiCfg.Store.Urls().GetByParam(r.Context(), param)
 		if err != nil {
 			logging.GetLogEntry(r).WithField("param", param).Error(err)
-			render.Render(w, r, url.ErrInternalServerError)
+			render.Render(w, r, url.ErrURLNotFound(errors.New("not found")))
 			return
 		}
 		http.Redirect(w, r, u.OriginalURL, http.StatusFound)
