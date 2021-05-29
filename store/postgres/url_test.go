@@ -60,4 +60,13 @@ func TestURL(t *testing.T) {
 	if !reflect.DeepEqual(url, url2) {
 		t.Fatalf("got %+v\n want %+v\n", got, want)
 	}
+
+	url3, err := s.Urls().GetByURL(ctx, originalURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if url3.OriginalURL != originalURL {
+		t.Fatalf("got %v want %v\n", url3.OriginalURL, originalURL)
+	}
 }
