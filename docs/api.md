@@ -65,11 +65,13 @@ Used by web clients to access fupisha.
 
 ## Generate API Key
 
-**URL** : `/api/v1/auth/apikey`
+**URL** : `/api/auth/apikey`
 
 **Method** : POST
 
 **Auth required** : YES
+
+**Header required** : `Api:v1`
 
 **Permissions required** : User is Account Owner
 
@@ -100,7 +102,7 @@ Used by web clients to access fupisha.
 ```json
 {
   "status": "Unauthorized",
-  "error": "missing or invalid access token"
+  "error": "invalid or expired login token"
 }
 ```
 
@@ -108,14 +110,14 @@ Used by web clients to access fupisha.
 
 **Condition** : If there was a malformed Bearer Token in the request Header.
 
-**Code** : `404 BAD REQUEST`
+**Code** : `401 UNAUTHORIZED`
 
 **Content** :
 
 ```json
 {
-  "status": "Bad Request",
-  "error": "invalid access token"
+  "status": "Unauthorized",
+  "error": "invalid or expired login token"
 }
 ```
 
@@ -123,14 +125,29 @@ Used by web clients to access fupisha.
 
 **Condition** : If there was an expired Bearer Token in the request Header.
 
-**Code** : `404 BAD REQUEST`
+**Code** : `401 UNAUTHORIZED`
 
 **Content** :
 
 ```json
 {
-  "status": "Bad Request",
-  "error": "expired access token"
+  "status": "Unauthorized",
+  "error": "invalid or expired login token"
+}
+```
+
+### Or
+
+**Condition** : If Api Version Header is missing or invalid.
+
+**Code** : `400 BAD REQUEST`
+
+**Content** :
+
+```json
+{
+  "status":"Bad Request",
+  "error":"missing api version header"
 }
 ```
 
@@ -138,11 +155,13 @@ Used by web clients to access fupisha.
 
 Used to collect a Token for a registered User.
 
-**URL** : `/api/v1/auth/login`
+**URL** : `/api/auth/login`
 
 **Method** : `POST`
 
 **Auth required** : NO
+
+**Header required** : `Api:v1`
 
 **Data constraints**
 
@@ -171,8 +190,8 @@ Used to collect a Token for a registered User.
 ```json
 {
   "email": "user@fupisha.io",
-  "name": "fupisha_user",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0b3B0YWwuY29tIiwiZXhwIjoxNDI2NDIwODAwLCJodHRwOi8vdG9wdGFsLmNvbS9qd3RfY2xhaW1zL2lzX2FkbWluIjp0cnVlLCJjb21wYW55IjoiVG9wdGFsIiwiYXdlc29tZSI6dHJ1ZX0.yRQYnWzskCZUxPwaQupWkiUzKELZ49eM7oWxAQK_ZXw"
+  "id": "udKxcNIyTiaohWkAVPH0Jg",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MjIzOTY1MTUsImlhdCI6MTYyMjM5NjE1NSwiaXNzIjoiZnVwaXNoYSIsIl91aWQiOiJiOWQyYjE3MC1kMjMyLTRlMjYtYTg4NS02OTAwNTRmMWY0MjYifQ.EJ5ZIbTn1lkaAnflYTb3Fy6aAzjGO3ePYwb7tDOO-Y0"
 }
 ```
 
@@ -180,14 +199,29 @@ Used to collect a Token for a registered User.
 
 **Condition** : If 'email' and 'password' combination is wrong.
 
+**Code** : `401 UNAUTHORIZED`
+
+**Content** :
+
+```json
+{
+  "status": "Unauthorized",
+  "error": "invalid email or password"
+}
+```
+
+### Or
+
+**Condition** : If Api Version Header is missing or invalid.
+
 **Code** : `400 BAD REQUEST`
 
 **Content** :
 
 ```json
 {
-  "status": "Bad Request",
-  "error": "Invalid login credentials."
+  "status":"Bad Request",
+  "error":"missing api version header"
 }
 ```
 
@@ -195,18 +229,19 @@ Used to collect a Token for a registered User.
 
 Used to registered a User.
 
-**URL** : `/api/v1/auth/signup`
+**URL** : `/api/auth/signup`
 
 **Method** : `POST`
 
 **Auth required** : NO
+
+**Header required** : `Api:v1`
 
 **Data constraints**
 
 ```json
 {
   "email": "[valid email address]",
-  "name": "[valid username]",
   "password": "[password in plain text]"
 }
 ```
@@ -216,7 +251,6 @@ Used to registered a User.
 ```json
 {
   "email": "user@fupisha.io",
-  "name": "frankenstein",
   "password": "abcd123456"
 }
 ```
@@ -231,13 +265,28 @@ Used to registered a User.
 
 **Condition** : If 'email' or 'name' or 'password' combination is invalid.
 
-**Code** : `422 UNPROCESSABLE ENTITY`
+**Code** : `401 UNAUTHORIZED`
 
 **Content** :
 
 ```json
 {
-  "status": "Unprocessable Entity",
-  "error": "email | name | password is invalid."
+  "status": "Unauthorized",
+  "error": "invalid email or password"
+}
+```
+
+### Or
+
+**Condition** : If Api Version Header is missing or invalid.
+
+**Code** : `400 BAD REQUEST`
+
+**Content** :
+
+```json
+{
+  "status":"Bad Request",
+  "error":"missing api version header"
 }
 ```
