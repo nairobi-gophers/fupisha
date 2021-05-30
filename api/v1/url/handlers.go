@@ -86,16 +86,19 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 		if pqErr, ok := errors.Cause(err).(*pq.Error); ok {
 			//if its a unique key violation, that means we had already shortened the url before.
 			if pqErr.Code == pq.ErrorCode("23505") {
-				//Let's retrieve the shortened url.
+				//Let's retrieve the shortened url param.
 				url, err := rs.Store.Urls().GetByURL(r.Context(), body.URL)
 				if err != nil {
 					log(r).WithField("url", body.URL).Error(err)
 					render.Render(w, r, ErrInternalServerError)
 					return
 				}
+				//concatenate the short url param with our baseurl e.g
+				//http://localhost:8888/ + okzbUwy = http://localhost:8888/okzbUwy
+				link = baseURL + url.ShortenedURLParam
 
 				resp := resBody{
-					Link: url.ShortenedURL,
+					Link: link,
 				}
 
 				render.Status(r, http.StatusCreated)
