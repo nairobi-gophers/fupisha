@@ -57,12 +57,12 @@ func ErrInvalidRequest(err error) render.Renderer {
 	}
 }
 
-// ErrUnsupportedAPIVersion returns status 405 Method Not Allowed  including error message.
+// ErrUnsupportedAPIVersion returns status 400 Bad Request including error message.
 func ErrUnsupportedAPIVersion(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
-		HTTPStatusCode: http.StatusMethodNotAllowed,
-		StatusText:     http.StatusText(http.StatusMethodNotAllowed),
+		HTTPStatusCode: http.StatusBadRequest,
+		StatusText:     http.StatusText(http.StatusBadRequest),
 		ErrorText:      err.Error(),
 	}
 }
