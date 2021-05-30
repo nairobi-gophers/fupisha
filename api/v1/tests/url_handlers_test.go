@@ -25,17 +25,19 @@ func TestUrl(t *testing.T) {
 
 	testURL := "https://www.youtube.com/watch?v=ZO3z966AqbU&t=14s"
 
-	testLink, err := url.Shorten(testURL, cfg.BaseURL, cfg.ParamLength)
+	baseURL := fmt.Sprintf("%s:%s", cfg.BaseURL, cfg.Port)
+
+	testParam, err := url.Shorten(testURL, cfg.ParamLength)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// testTime, err := time.Parse(time.RFC3339, "2020-02-03T04:05:06Z")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
+	if !strings.HasSuffix(baseURL, "/") {
+		baseURL += "/"
+	}
 
-	// uid := "JBxPVPeqS72SqJzESF2TVw"
+	testLink := baseURL + testParam
+
 	const (
 		testEmail    = "admin@fupisha.io"
 		testPassword = "ih@veaStr0ngpassword"
@@ -48,11 +50,6 @@ func TestUrl(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create test user %q", err)
 	}
-
-	// testID, err := encoding.Decode(uid)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
 
 	testSecret := "c4c0f2c42bde58f4d5f453483b3bed2b2915779cacff15526b2560b00748ec36"
 
@@ -73,9 +70,6 @@ func TestUrl(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// testKey := encoding.GenUniqueID()
-	// testKey1 := encoding.GenUniqueID()
 
 	logger := logging.NewLogger(cfg)
 	logger.SetOutput(ioutil.Discard)
