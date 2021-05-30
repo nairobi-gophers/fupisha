@@ -60,7 +60,15 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	link, err := Shorten(body.URL, rs.Config.BaseURL, rs.Config.ParamLength)
+	baseURL := rs.Config.BaseURL + ":" + rs.Config.Port
+
+	param, err := Shorten(body.URL, rs.Config.ParamLength)
+
+	if !strings.HasSuffix(baseURL, "/") {
+		baseURL += "/"
+	}
+
+	link := baseURL + param
 
 	if err != nil {
 		log(r).WithField("url", body.URL).Error(err)
@@ -73,7 +81,7 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Insert the shortened url in the database
-	_, err = rs.Store.Urls().New(r.Context(), userID, body.URL, link)
+	_, err = rs.Store.Urls().New(r.Context(), userID, body.URL, param)
 	if err != nil {
 		if pqErr, ok := errors.Cause(err).(*pq.Error); ok {
 			//if its a unique key violation, that means we had already shortened the url before.
@@ -83,6 +91,7 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					log(r).WithField("url", body.URL).Error(err)
 					render.Render(w, r, ErrInternalServerError)
+					return
 				}
 
 				resp := resBody{
@@ -108,16 +117,14 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 }
 
 //Shorten shortens a long url string
-func Shorten(originalURL, baseURL string, len int) (string, error) {
-	if !strings.HasSuffix(baseURL, "/") {
-		baseURL += "/"
-	}
+func Shorten(originalURL string, len int) (string, error) {
+
 	param, err := encoding.GenUniqueParam("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", len)
 	if err != nil {
 		return "", err
 	}
 
-	return baseURL + param, nil
+	return param, nil
 }
 
 func log(r *http.Request) logrus.FieldLogger {
