@@ -24,7 +24,7 @@ var migrate = []string{
 		id UUID PRIMARY KEY,
 		owner UUID,
 		original_url TEXT UNIQUE,
-		short_url TEXT,
+		short_url_param TEXT,
 		visit_count INTEGER,
 		created_at TIMESTAMPTZ,
 		updated_at TIMESTAMPTZ,
@@ -32,7 +32,7 @@ var migrate = []string{
 	);
 
 	CREATE UNIQUE INDEX ON urls(original_url);
-	CREATE UNIQUE INDEX ON urls(short_url);
+	CREATE UNIQUE INDEX ON urls(short_url_param);
 	`,
 }
 
