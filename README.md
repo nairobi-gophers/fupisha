@@ -56,6 +56,33 @@ then you can follow along with the below instructions.
         
     `make logs`  
           
+## Implemented Features
+- [x] Signup 
+- [x] Login 
+- [x] Shorten URL
+- [x] URL Redirection
+
+## Sample HTTP Requests
+- Signup 
+
+```
+curl -X POST -H "Api:v1" -d '{"email":"admin@fupisha.io","password":"iamjustauser"}' http://localhost:8888/auth/signup
+```
+
+- Login 
+```
+curl -X POST -H "Api:v1" -d '{"email":"admin@fupisha.io","password":"iamjustauser"}' http://localhost:8888/auth/login
+```
+
+- Shorten URL
+```
+curl -X POST -H "Api:v1"  -d '{"url":"https://pkg.go.dev/github.com/mailgun/groupcache"}' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MjIzOTkzMjYsImlhdCI6MTYyMjM5ODk2NiwiaXNzIjoiZnVwaXNoYSIsIl91aWQiOiJkNzkwOTVmYy0zYjFlLTQ4MTUtOTNmZS1lMTk4MTI0ZTcxZDMifQ.EGD2up_7iJP5FS_OhlR6UYvEqu9orRgU1iR65u-3Hrg" http://localhost:8888/url/shorten
+```
+
+- URL Redirection
+```
+curl -X GET http://localhost:8888/a3UdbL
+```
 # Why build this
 
 It will involve the community and awesome technologies like:
