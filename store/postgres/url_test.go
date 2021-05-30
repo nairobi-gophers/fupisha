@@ -35,12 +35,12 @@ func TestURL(t *testing.T) {
 	}
 
 	want := store.URL{
-		ID:           url.ID,
-		Owner:        u.ID,
-		OriginalURL:  originalURL,
-		ShortenedURL: param,
-		CreatedAt:    url.CreatedAt,
-		UpdatedAt:    url.UpdatedAt,
+		ID:                url.ID,
+		Owner:             u.ID,
+		OriginalURL:       originalURL,
+		ShortenedURLParam: param,
+		CreatedAt:         url.CreatedAt,
+		UpdatedAt:         url.UpdatedAt,
 	}
 
 	got, err := s.Urls().GetByParam(ctx, param)
