@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/nairobi-gophers/fupisha/logging"
@@ -46,8 +47,11 @@ func NewServer() (*Server, error) {
 	}
 
 	srv := http.Server{
-		Addr:    ":" + cfg.Port,
-		Handler: api,
+		ReadTimeout:  5 * time.Second,   //time from when the connection is accepted to when the request body is fully read
+		WriteTimeout: 10 * time.Second,  //time from the end of the request header read to the end of the response write (a.k.a. the lifetime of the ServeHTTP)
+		IdleTimeout:  120 * time.Second, // the amount of time a Keep-Alive connection will be kept idle before being reused
+		Addr:         ":" + cfg.Port,
+		Handler:      api,
 	}
 	return &Server{&srv}, nil
 }
