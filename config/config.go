@@ -35,7 +35,7 @@ type Config struct {
 	//SMTP third party email provider smtp configuration fields.
 	SMTP struct {
 		//Port smtp port
-		Port string `envconfig:"FUPISHA_SMTP_PORT"`
+		Port int `envconfig:"FUPISHA_SMTP_PORT"`
 		//Host smtp host e.g. smtp.gmail.com
 		Host string `envconfig:"FUPISHA_SMTP_HOST"`
 		//Username smtp username.
