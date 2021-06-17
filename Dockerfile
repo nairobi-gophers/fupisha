@@ -26,5 +26,6 @@ FROM alpine:3.10 AS prod
 RUN apk --no-cache add ca-certificates --upgrade bash
 
 COPY --from=dev /fupisha/main main
+COPY --from=dev /fupisha/templates templates
 
 CMD [ "./main" ,"start"]
