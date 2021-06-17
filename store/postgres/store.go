@@ -103,7 +103,10 @@ func Connect(cfg *Config) (*Store, error) {
 	db.SetMaxIdleConns(cfg.MaxIdleConns)
 	db.SetMaxOpenConns(cfg.MaxOpenConns)
 
-	if err := statusCheck(context.Background(), db); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
+	defer cancel()
+
+	if err := statusCheck(ctx, db); err != nil {
 		return nil, errors.Wrap(err, "connect: connection never ready")
 	}
 
