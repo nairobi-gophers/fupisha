@@ -29,7 +29,7 @@ func (s userStore) New(ctx context.Context, email, password string) (store.User,
 		Email:               email,
 		Password:            password,
 		VerificationToken:   encoding.GenUniqueID(),
-		VerificationExpires: now.Add(time.Minute * 60).UTC().Round(time.Microsecond), //expires 60 mins later
+		VerificationExpires: now.Add(time.Minute * 15).UTC().Round(time.Microsecond), //expires 15 mins later
 		CreatedAt:           now.UTC().Round(time.Microsecond),
 		UpdatedAt:           now.UTC().Round(time.Microsecond),
 	}
