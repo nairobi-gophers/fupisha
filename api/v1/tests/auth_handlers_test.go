@@ -10,9 +10,9 @@ import (
 	"github.com/nairobi-gophers/fupisha/api"
 	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/nairobi-gophers/fupisha/logging"
+	"github.com/nairobi-gophers/fupisha/provider"
 	"github.com/nairobi-gophers/fupisha/store/postgres"
 )
-
 
 func TestAuth(t *testing.T) {
 	cfg, err := config.New()
@@ -23,6 +23,11 @@ func TestAuth(t *testing.T) {
 	store, teardown := postgres.NewTestDatabase(t)
 	t.Cleanup(teardown)
 
+	mailer, err := provider.NewMailerWithSMTP(cfg, "../../../templates")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	logger := logging.NewLogger(cfg)
 	logger.SetOutput(ioutil.Discard)
 
@@ -30,6 +35,7 @@ func TestAuth(t *testing.T) {
 		Logger:     logger,
 		Cfg:        cfg,
 		Store:      store,
+		Mailer:     mailer,
 		EnableCORS: false,
 	}
 
