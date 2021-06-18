@@ -41,7 +41,6 @@ func (body *loginRequest) Bind(r *http.Request) error {
 
 //HandleSignup signup handler func for handling requests for new accounts.
 func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
-
 	body := signupRequest{}
 
 	if err := render.Bind(r, &body); err != nil {
@@ -50,7 +49,7 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := rs.Store.Users().New(r.Context(), body.Email, body.Password)
+	u, err := rs.Store.Users().New(r.Context(), body.Email, body.Password)
 
 	if err != nil {
 		if pqErr, ok := errors.Cause(err).(*pq.Error); ok {
@@ -62,6 +61,19 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		log(r).WithField("email", body.Email).Error(err)
+		render.Render(w, r, ErrInternalServerError)
+		return
+	}
+
+	verifyEmailContent := provider.VerifyEmailContent{
+		SiteURL:            "http://fupisha.io",
+		SiteName:           "Fupisha",
+		VerificationExpiry: u.VerificationExpires,
+		VerificationURL:    rs.Config.BaseURL + rs.Config.Port + "/verify/?v=" + encoding.Encode(u.VerificationToken),
+	}
+
+	if err := rs.Mailer.SendVerifyNotification(body.Email, verifyEmailContent); err != nil {
+		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
