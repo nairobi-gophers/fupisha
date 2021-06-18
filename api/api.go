@@ -14,6 +14,7 @@ import (
 	"github.com/nairobi-gophers/fupisha/api/v1/url"
 	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/nairobi-gophers/fupisha/logging"
+	"github.com/nairobi-gophers/fupisha/provider"
 	"github.com/nairobi-gophers/fupisha/store"
 	"github.com/sirupsen/logrus"
 )
@@ -23,13 +24,14 @@ type ApiConfig struct {
 	Logger     *logrus.Logger
 	Cfg        *config.Config
 	Store      store.Store
+	Mailer     *provider.Mailer
 	EnableCORS bool
 }
 
 //New configures application resources and routers.
 func New(apiCfg *ApiConfig) (*chi.Mux, error) {
 
-	authResource := auth.NewResource(apiCfg.Store, apiCfg.Cfg)
+	authResource := auth.NewResource(apiCfg.Store, apiCfg.Cfg, apiCfg.Mailer)
 	urlResource := url.NewResource(apiCfg.Store, apiCfg.Cfg)
 
 	r := chi.NewRouter()
