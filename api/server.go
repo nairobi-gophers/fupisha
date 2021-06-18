@@ -11,6 +11,7 @@ import (
 
 	"github.com/nairobi-gophers/fupisha/config"
 	"github.com/nairobi-gophers/fupisha/logging"
+	"github.com/nairobi-gophers/fupisha/provider"
 )
 
 //Server defines our server dependencies
@@ -34,10 +35,16 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
+	mailer, err := provider.NewMailerWithSMTP(cfg, "./templates")
+	if err != nil {
+		return nil, err
+	}
+
 	apiCfg := &ApiConfig{
 		Logger:     logger,
 		Store:      store,
 		Cfg:        cfg,
+		Mailer:     mailer,
 		EnableCORS: false,
 	}
 
