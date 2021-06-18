@@ -15,27 +15,30 @@ import (
 	"jaytaylor.com/html2text"
 )
 
-var (
-	templates *template.Template
-)
+// var (
+// 	templates *template.Template
+// )
 
 type Mailer struct {
-	client *mail.Dialer
-	from   Email
+	client   *mail.Dialer
+	template *template.Template
+	from     Email
 }
 
-//NewEmailService is a constructor function that initializes and returns a ready to use email service object.
-func NewMailerWithSMTP(cfg *config.Config) (*Mailer, error) {
+//NewEmailWithSMTP is a constructor function that initializes and returns a ready to use mailer object, an error interface otherwise.
+func NewMailerWithSMTP(cfg *config.Config, tplDir string) (*Mailer, error) {
 	//parse templates here, if err we fail early and return.
-	if err := parseTemplates(); err != nil {
+	tpl, err := parseTemplates(tplDir)
+	if err != nil {
 		return nil, err
 	}
 
 	dialer := mail.NewDialer(cfg.SMTP.Host, cfg.SMTP.Port, cfg.SMTP.Username, cfg.SMTP.Password)
 
 	m := &Mailer{
-		client: dialer,
-		from:   NewEmail(cfg.SMTP.FromName, cfg.SMTP.FromAddress),
+		client:   dialer,
+		from:     NewEmail(cfg.SMTP.FromName, cfg.SMTP.FromAddress),
+		template: tpl,
 	}
 
 	m.client.StartTLSPolicy = mail.MandatoryStartTLS
@@ -49,7 +52,7 @@ func NewMailerWithSMTP(cfg *config.Config) (*Mailer, error) {
 	return m, nil
 }
 
-func (m *Mailer) send(email interface{}) error {
+func (m Mailer) send(email interface{}) error {
 
 	msg := mail.NewMessage()
 	if em, ok := email.(*message); ok {
@@ -65,7 +68,7 @@ func (m *Mailer) send(email interface{}) error {
 }
 
 //SendVerifyNotification sends the verify email notification to the user's email address.
-func (m *Mailer) SendVerifyNotification(address string, content VerifyEmailContent) error {
+func (m Mailer) SendVerifyNotification(address string, content VerifyEmailContent) error {
 	msg := &message{
 		from:     m.from,
 		to:       NewEmail("", address),
@@ -74,24 +77,28 @@ func (m *Mailer) SendVerifyNotification(address string, content VerifyEmailConte
 		content:  content,
 	}
 
-	if err := msg.parse(); err != nil {
+	if err := msg.parse(m.template); err != nil {
 		return err
 	}
 
 	return m.send(msg)
 }
 
-func parseTemplates() error {
+func parseTemplates(tplDir string) (*template.Template, error) {
 
-	templates = template.New("").Funcs(fMap)
+	templates := template.New("").Funcs(fMap)
 
-	return filepath.Walk("./templates", func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(tplDir, func(path string, info os.FileInfo, err error) error {
 		if filepath.Ext(path) == ".html" {
 			_, err = templates.ParseFiles(path)
 			return err
 		}
 		return err
-	})
+	}); err != nil {
+		return nil, err
+	}
+
+	return templates, nil
 }
 
 var fMap = template.FuncMap{
@@ -135,7 +142,7 @@ type message struct {
 	text     string
 }
 
-func (m *message) parse() error {
+func (m *message) parse(templates *template.Template) error {
 	buf := new(bytes.Buffer)
 
 	if err := templates.ExecuteTemplate(buf, m.template, m.content); err != nil {
