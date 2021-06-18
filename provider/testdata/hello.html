@@ -1,0 +1,20 @@
+{{define "hello"}}
+  <html>
+	<head>
+	<title>{{.SiteName}}</title>
+	</head>
+	<body>
+    <h1>Hello, </h1>
+		<p>
+		Thank you for signing up for Fupisha as an early user! Please verify your email 
+		<a href="{{.VerificationURL}}">
+		<button>Verify</button>
+		</a>
+		</p>
+
+		<p> The link above expires in {{.VerificationExpiry | formatAsDuration}}</p>
+
+		<a href="{{.SiteURL}}">The Fupisha Team</a>
+	</body>
+	</html>
+{{end}}
