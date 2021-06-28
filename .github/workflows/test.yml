@@ -1,0 +1,53 @@
+on: [push, pull_request]
+name: Test
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.15.x, 1.16.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      FUPISHA_SMTP_PORT: 587
+      FUPISHA_SMTP_HOST: smtp.mailtrap.io
+      FUPISHA_SMTP_USERNAME: ${{secrets.FUPISHA_SMTP_USERNAME}}
+      FUPISHA_SMTP_PASSWORD: ${{secrets.FUPISHA_SMTP_PASSWORD}}
+      FUPISHA_SMTP_FROM_NAME: Fupisha
+      FUPISHA_SMTP_FROM_ADDRESS: support@fupisha.io
+      FUPISHA_STORE_TYPE: postgresql
+      FUPISHA_STORE_POSTGRESQL_ADDRESS: db:5432
+      FUPISHA_STORE_POSTGRESQL_USERNAME: fupisha
+      FUPISHA_STORE_POSTGRESQL_PASSWORD: ${{secrets.FUPISHA_STORE_POSTGRESQL_PASSWORD}}
+      FUPISHA_STORE_POSTGRESQL_DATABASE: fupisha
+      FUPISHA_JWT_SECRET: ${{secrets.FUPISHA_JWT_SECRET}}
+      FUPISHA_JWT_EXPIRE_DELTA: 6
+      FUPISHA_BASE_URL: http://localhost
+      FUPISHA_TITLE: Fupisha
+      FUPISHA_LOG_LEVEL: info
+      FUPISHA_TEXT_LOGGING: false
+      FUPISHA_PARAM_LENGTH: 6
+      FUPISHA_HTTP_PORT: 8888
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install Dependencies
+      run: |
+        go mod download
+        go mod verify 
+    - name: Run vet
+      run: go vet ./...
+    - name: Run staticcheck
+      run: |
+         wget -O staticcheck.tgz https://github.com/dominikh/go-tools/releases/download/2021.1/staticcheck_linux_amd64.tar.gz
+         sudo tar -xzf staticcheck.tgz
+         ./staticcheck/staticcheck --version
+         ./staticcheck/staticcheck ./...
+    - name: Run unit tests
+      run: go test -v ./store/postgres/ -count=1
+    - name: Run integration tests
+      run: go test -v ./api/v1/tests/ -count=1
+    
