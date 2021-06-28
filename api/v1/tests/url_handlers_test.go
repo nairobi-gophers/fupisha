@@ -38,17 +38,24 @@ func TestUrl(t *testing.T) {
 
 	testLink := baseURL + testParam
 
+	ctx := context.Background()
+
+	store, teardown := postgres.NewTestDatabase(t)
+	t.Cleanup(teardown)
+
 	const (
 		testEmail    = "admin@fupisha.io"
 		testPassword = "ih@veaStr0ngpassword"
 	)
 
-	store, teardown := postgres.NewTestDatabase(t)
-	t.Cleanup(teardown)
-
-	u, err := store.Users().New(context.Background(), testEmail, testPassword)
+	u, err := store.Users().New(ctx, testEmail, testPassword)
 	if err != nil {
 		t.Fatalf("could not create test user %q", err)
+	}
+
+	_, err = store.Urls().New(ctx, u.ID, testURL, testParam)
+	if err != nil {
+		t.Fatalf("could not insert the short param")
 	}
 
 	testSecret := "c4c0f2c42bde58f4d5f453483b3bed2b2915779cacff15526b2560b00748ec36"
@@ -110,6 +117,12 @@ func TestUrl(t *testing.T) {
 			wantCode: http.StatusCreated,
 			wantBody: fmt.Sprintf(`{"link":"%s"}`, testLink),
 		},
+		{
+			name:     "Resolve a short url",
+			url:      testLink,
+			method:   "GET",
+			wantCode: http.StatusFound,
+		},
 	}
 
 	for _, tc := range tests {
@@ -131,8 +144,10 @@ func TestUrl(t *testing.T) {
 			t.Fatalf("handler returned unexpected status: want status code %d got %d", tc.wantCode, rr.Code)
 		}
 
-		if !strings.Contains(rr.Body.String(), "link") {
-			t.Fatalf("handler returned unexpected body: want response body %q got %q", tc.wantBody, strings.TrimSuffix(rr.Body.String(), "\n"))
+		if tc.method != "GET" {
+			if !strings.Contains(rr.Body.String(), "link") {
+				t.Fatalf("handler returned unexpected body: want response body %q got %q", tc.wantBody, strings.TrimSuffix(rr.Body.String(), "\n"))
+			}
 		}
 	}
 }
