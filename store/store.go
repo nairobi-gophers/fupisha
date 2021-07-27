@@ -17,7 +17,9 @@ type UserStore interface {
 	New(ctx context.Context, email, password string) (User, error)
 	Get(ctx context.Context, id uuid.UUID) (User, error)
 	GetByEmail(ctx context.Context, email string) (User, error)
+	GetByVerificationToken(ctx context.Context, token uuid.UUID) (User, error)
 	SetAPIKey(ctx context.Context, id, key uuid.UUID) error
+	SetVerified(ctx context.Context, id uuid.UUID) error
 }
 
 //URLStore is a url data store interface.
