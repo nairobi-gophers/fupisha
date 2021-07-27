@@ -22,14 +22,17 @@ var ErrNoSuchAccount = errors.New("no such account")
 //ErrEmailTaken an already registered email.
 var ErrEmailTaken = errors.New("that email is taken")
 
-//ErrLoginToken an invalid or expired token
+//ErrLoginToken an invalid or expired .
 var ErrLoginToken = errors.New("invalid or expired login token")
 
-//ErrAPIUnsupported an unsupported api version
+//ErrAPIUnsupported an unsupported api version.
 var ErrAPIUnsupported = errors.New("unsupported api version")
 
 //ErrMissingAPIVersion a missing api version header with the version text.
 var ErrMissingAPIVersion = errors.New("missing api version header")
+
+//ErrInvalidVerificationToken an expired or invalid verification token.
+var ErrInvalidVerificationToken = errors.New("invalid or expired verification token")
 
 // ErrResponse renderer type for handling all sorts of errors.
 type ErrResponse struct {
