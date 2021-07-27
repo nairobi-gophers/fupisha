@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +11,7 @@ import (
 
 	"github.com/nairobi-gophers/fupisha/api"
 	"github.com/nairobi-gophers/fupisha/config"
+	"github.com/nairobi-gophers/fupisha/encoding"
 	"github.com/nairobi-gophers/fupisha/logging"
 	"github.com/nairobi-gophers/fupisha/provider"
 	"github.com/nairobi-gophers/fupisha/store/postgres"
@@ -27,6 +30,20 @@ func TestAuth(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	const (
+		testEmail    = "admin@fupisha.io"
+		testPassword = "ih@veaStr0ngpassword"
+	)
+
+	ctx := context.Background()
+
+	u, err := store.Users().New(ctx, testEmail, testPassword)
+	if err != nil {
+		t.Fatalf("could not create test user %q", err)
+	}
+
+	verificationToken := encoding.Encode(u.VerificationToken)
 
 	logger := logging.NewLogger(cfg)
 	logger.SetOutput(ioutil.Discard)
@@ -100,6 +117,13 @@ func TestAuth(t *testing.T) {
 			wantCode: http.StatusUnprocessableEntity,
 			wantBody: `{"status":"Unprocessable Entity","error":"password: must contain English letters and digits only."}`,
 		},
+		{
+			name:     "Verify with a valid verification token",
+			url:      fmt.Sprintf("/auth/verify?v=%s", verificationToken),
+			method:   "GET",
+			wantCode: http.StatusOK,
+			wantBody: `{}`,
+		},
 	}
 
 	for _, tc := range tests {
@@ -119,8 +143,10 @@ func TestAuth(t *testing.T) {
 			t.Fatalf("handler returned unexpected status code: want status code %d got %d", tc.wantCode, rr.Code)
 		}
 
-		if tc.wantBody != strings.TrimSuffix(rr.Body.String(), "\n") {
-			t.Fatalf("handler returned unexpected body: want response body %q\n got %q", tc.wantBody, strings.TrimSuffix(rr.Body.String(), "\n"))
+		if tc.method != "GET" {
+			if tc.wantBody != strings.TrimSuffix(rr.Body.String(), "\n") {
+				t.Fatalf("handler returned unexpected body: want response body %q\n got %q", tc.wantBody, strings.TrimSuffix(rr.Body.String(), "\n"))
+			}
 		}
 	}
 
