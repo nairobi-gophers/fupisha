@@ -66,4 +66,28 @@ func TestUser(t *testing.T) {
 		t.Fatalf("failed to compare password: %s", err)
 	}
 
+	u1, err := s.Users().GetByVerificationToken(ctx, u.VerificationToken)
+	if err != nil {
+		t.Fatalf("bad user verification token: %v", u.VerificationToken)
+	}
+
+	if !reflect.DeepEqual(u1, want) {
+		t.Fatalf("got %+v want %+v", u1, want)
+	}
+
+	if err := s.Users().SetVerified(ctx, u1.ID); err != nil {
+		t.Fatalf("failed to update the verified field: %s", err)
+	}
+
+	got1, err := s.Users().GetByEmail(ctx, u1.Email)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	verified := true
+
+	if got1.Verified != verified {
+		t.Fatalf("got %t want %t", got1.Verified, verified)
+	}
+
 }
