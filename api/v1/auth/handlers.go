@@ -70,7 +70,7 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		SiteURL:            "http://fupisha.io",
 		SiteName:           "Fupisha",
 		VerificationExpiry: u.VerificationExpires,
-		VerificationURL:    rs.Config.BaseURL  + rs.Config.Port + "/verify/?v=" + encoding.Encode(u.VerificationToken),
+		VerificationURL:    rs.Config.BaseURL + ":" + rs.Config.Port + "/auth/verify/?v=" + encoding.Encode(u.VerificationToken),
 	}
 
 	if err := rs.Mailer.SendVerifyNotification(body.Email, verifyEmailContent); err != nil {
