@@ -77,6 +77,19 @@ func (s userStore) GetByEmail(ctx context.Context, email string) (store.User, er
 	return user, nil
 }
 
+//GetByVerificationToken retrieves user whose verification token matches the given token string.
+func (s userStore) GetByVerificationToken(ctx context.Context, token uuid.UUID) (store.User, error) {
+	user := store.User{}
+
+	const q = `SELECT id,email,password,verification_token,verified,verification_expires,created_at,updated_at FROM users WHERE verification_token=$1`
+
+	if err := s.db.GetContext(ctx, &user, q, token); err != nil {
+		return user, errors.Wrap(err, "retrievng user by verification token")
+	}
+
+	return user, nil
+}
+
 //SetAPIKey sets the api key for the given user id.
 func (s userStore) SetAPIKey(ctx context.Context, id, key uuid.UUID) error {
 	user := store.User{
@@ -88,6 +101,19 @@ func (s userStore) SetAPIKey(ctx context.Context, id, key uuid.UUID) error {
 
 	if _, err := s.db.ExecContext(ctx, q, user.APIKey, user.ID); err != nil {
 		return errors.Wrap(err, "updating the api key")
+	}
+
+	return nil
+}
+
+//SetVerified updates the verified value for the user with the given user id.
+func (s userStore) SetVerified(ctx context.Context, id uuid.UUID) error {
+	verified := true
+
+	const q = `UPDATE users SET verified=$1 WHERE id=$2`
+
+	if _, err := s.db.ExecContext(ctx, q, verified, id); err != nil {
+		return errors.Wrap(err, "updating verified field")
 	}
 
 	return nil
