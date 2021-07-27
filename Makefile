@@ -24,7 +24,7 @@ test:unit-test integration-test
 # ==============================================================================
 	
 up:
-	@docker-compose up --detach --remove-orphans
+	@docker-compose up --build  --detach --remove-orphans
 
 down:
 	@docker-compose down --remove-orphans
