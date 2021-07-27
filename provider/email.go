@@ -84,6 +84,22 @@ func (m Mailer) SendVerifyNotification(address string, content VerifyEmailConten
 	return m.send(msg)
 }
 
+func (m Mailer) SendWelcomeNotification(address string, content WelcomeEmailContent) error {
+	msg := &message{
+		from:     m.from,
+		to:       NewEmail("", address),
+		subject:  "Welcome to Fupisha!",
+		template: "welcome",
+		content:  content,
+	}
+
+	if err := msg.parse(m.template); err != nil {
+		return err
+	}
+
+	return m.send(msg)
+}
+
 func parseTemplates(tplDir string) (*template.Template, error) {
 
 	templates := template.New("").Funcs(fMap)
@@ -175,4 +191,11 @@ type VerifyEmailContent struct {
 	SiteName           string
 	VerificationExpiry time.Time
 	VerificationURL    string
+}
+
+//WelcomeEmailContent provides the values to be displayed in the welcome email template.
+type WelcomeEmailContent struct {
+	SiteURL  string
+	SiteName string
+	LoginURL string
 }
