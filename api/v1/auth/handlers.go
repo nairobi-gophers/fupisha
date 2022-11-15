@@ -40,7 +40,7 @@ func (body *loginRequest) Bind(r *http.Request) error {
 	return validation.ValidateStruct(body, validation.Field(&body.Email, validation.Required, is.Email), validation.Field(&body.Password, validation.Required, validation.Length(8, 32), is.Alphanumeric))
 }
 
-//HandleSignup signup handler func for handling requests for new accounts.
+// HandleSignup signup handler func for handling requests for new accounts.
 func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	body := signupRequest{}
 
@@ -50,7 +50,7 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := rs.Store.Users().New(r.Context(), body.Email, body.Password)
+	u, err := rs.Store.NewUser(r.Context(), body.Email, body.Password)
 
 	if err != nil {
 		if pqErr, ok := errors.Cause(err).(*pq.Error); ok {
@@ -83,7 +83,7 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, http.NoBody)
 }
 
-//HandleVerify verify the verification code sent with the signup email
+// HandleVerify verify the verification code sent with the signup email
 func (rs Resource) HandleVerify(w http.ResponseWriter, r *http.Request) {
 	verificationCode := r.URL.Query().Get("v")
 
@@ -103,7 +103,7 @@ func (rs Resource) HandleVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//then check if it exists in the database
-	u, err := rs.Store.Users().GetByVerificationToken(r.Context(), code)
+	u, err := rs.Store.GetUserByVerificationToken(r.Context(), code)
 	if err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInvalidRequest(ErrInvalidVerificationToken))
@@ -118,7 +118,7 @@ func (rs Resource) HandleVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//mark the user as verified
-	if err := rs.Store.Users().SetVerified(r.Context(), u.ID); err != nil {
+	if err := rs.Store.SetUserVerified(r.Context(), u.ID); err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
@@ -143,7 +143,7 @@ func (rs Resource) HandleVerify(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, http.NoBody)
 }
 
-//HandleLogin login handler for handling login requests
+// HandleLogin login handler for handling login requests
 func (rs Resource) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	body := loginRequest{}
@@ -154,7 +154,7 @@ func (rs Resource) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := rs.Store.Users().GetByEmail(r.Context(), body.Email)
+	usr, err := rs.Store.GetUserByEmail(r.Context(), body.Email)
 	if err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrUnauthorized(ErrInvalidEmailOrPassword))

@@ -14,12 +14,12 @@ import (
 	"github.com/nairobi-gophers/fupisha/provider"
 )
 
-//Server defines our server dependencies
+// Server defines our server dependencies
 type Server struct {
 	*http.Server
 }
 
-//NewServer creates and configures an fupisha API Server serving all application routes.
+// NewServer creates and configures an fupisha API Server serving all application routes.
 func NewServer() (*Server, error) {
 
 	cfg, err := config.New()
@@ -63,7 +63,7 @@ func NewServer() (*Server, error) {
 	return &Server{&srv}, nil
 }
 
-//Start runs ListenAndServe on the http.Server with graceful shutdown.
+// Start runs ListenAndServe on the http.Server with graceful shutdown.
 func (srv *Server) Start() {
 
 	log.Println("Starting Fupisha API Server...")

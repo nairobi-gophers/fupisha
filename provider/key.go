@@ -9,14 +9,14 @@ import (
 	"github.com/nairobi-gophers/fupisha/store"
 )
 
-//GenAPIKey generates an api key for third party applications.
+// GenAPIKey generates an api key for third party applications.
 func GenAPIKey(uid uuid.UUID, s store.Store) (string, error) {
 	ctx := context.Background()
 
 	key := encoding.GenUniqueID()
 
 	//persist the api key to the database before encoding it.
-	err := s.Users().SetAPIKey(ctx, uid, key)
+	err := s.SetUserAPIKey(ctx, uid, key)
 
 	if err != nil {
 		log.Fatalf("failed to persist generated api key: %s", err)

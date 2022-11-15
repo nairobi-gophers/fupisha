@@ -15,7 +15,7 @@ func TestURL(t *testing.T) {
 
 	ctx := context.Background()
 
-	u, err := s.Users().New(ctx, "test_user@test.com", "test_password")
+	u, err := s.NewUser(ctx, "test_user@test.com", "test_password")
 
 	if err != nil {
 		t.Fatalf("failed to create user: %s", err)
@@ -29,7 +29,7 @@ func TestURL(t *testing.T) {
 		t.Fatalf("failed to generate url param: %s", err)
 	}
 
-	url, err := s.Urls().New(ctx, u.ID, originalURL, param)
+	url, err := s.NewURL(ctx, u.ID, originalURL, param)
 	if err != nil {
 		t.Fatalf("failed to create url: %s", err)
 	}
@@ -43,7 +43,7 @@ func TestURL(t *testing.T) {
 		UpdatedAt:         url.UpdatedAt,
 	}
 
-	got, err := s.Urls().GetByParam(ctx, param)
+	got, err := s.GetURLByParam(ctx, param)
 	if err != nil {
 		t.Fatalf("failed to retrieve url param: %s", err)
 	}
@@ -52,7 +52,7 @@ func TestURL(t *testing.T) {
 		t.Fatalf("got %+v\n want %+v\n", got, want)
 	}
 
-	url2, err := s.Urls().Get(ctx, url.ID)
+	url2, err := s.GetURLByID(ctx, url.ID)
 	if err != nil {
 		t.Fatalf("failed to retrieve url by id: %s", err)
 	}
@@ -61,7 +61,7 @@ func TestURL(t *testing.T) {
 		t.Fatalf("got %+v\n want %+v\n", got, want)
 	}
 
-	url3, err := s.Urls().GetByURL(ctx, originalURL)
+	url3, err := s.GetURLByLongStr(ctx, originalURL)
 	if err != nil {
 		t.Fatal(err)
 	}

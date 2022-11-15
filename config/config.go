@@ -11,7 +11,7 @@ import (
 	"github.com/nairobi-gophers/fupisha/store/postgres"
 )
 
-//Config is a fupisha configuration struct
+// Config is a fupisha configuration struct
 type Config struct {
 	//BaseURL fupisha's fully qualified domain name.
 	BaseURL string `envconfig:"FUPISHA_BASE_URL"`
@@ -91,7 +91,7 @@ type Config struct {
 	}
 }
 
-//GetStore returns a connection to the relevant database as specified on the config
+// GetStore returns a connection to the relevant database as specified on the config
 func (cfg *Config) GetStore() (store.Store, error) {
 	switch cfg.Store.Type {
 	case "postgresql":
@@ -103,12 +103,12 @@ func (cfg *Config) GetStore() (store.Store, error) {
 			Name:     cfg.Store.PostgreSQL.Database,
 		}
 
-		return postgres.Connect(dbCfg)
+		return postgres.NewStore(dbCfg)
 	}
 	return nil, fmt.Errorf("config: unknown store type: %s", cfg.Store.Type)
 }
 
-//New returns an initialized config object ready for use
+// New returns an initialized config object ready for use
 func New() (*Config, error) {
 	cfg := Config{}
 	if err := envconfig.Process("", &cfg); err != nil {
@@ -119,7 +119,7 @@ func New() (*Config, error) {
 	return &cfg, nil
 }
 
-//GenKey generates a  32 byte crypto-random unique key
+// GenKey generates a  32 byte crypto-random unique key
 func GenKey() {
 	log.Printf("%s\n", encoding.GenHexKey(32))
 }

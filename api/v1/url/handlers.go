@@ -28,7 +28,7 @@ func (body *shortenURLRequest) Bind(r *http.Request) error {
 	return validation.ValidateStruct(body, validation.Field(&body.URL, validation.Required, is.URL))
 }
 
-//HandleShortenURL shortens the url and returns the shrotened url in the response body
+// HandleShortenURL shortens the url and returns the shrotened url in the response body
 func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 	body := shortenURLRequest{}
 
@@ -53,7 +53,7 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Lets validate that userID actually belongs to a real user.
-	_, err = rs.Store.Users().Get(r.Context(), userID)
+	_, err = rs.Store.GetUserByID(r.Context(), userID)
 	if err != nil {
 		log(r).WithField("userID", userID).Error(err)
 		render.Render(w, r, ErrInternalServerError)
@@ -81,13 +81,13 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Insert the shortened url in the database
-	_, err = rs.Store.Urls().New(r.Context(), userID, body.URL, param)
+	_, err = rs.Store.NewURL(r.Context(), userID, body.URL, param)
 	if err != nil {
 		if pqErr, ok := errors.Cause(err).(*pq.Error); ok {
 			//if its a unique key violation, that means we had already shortened the url before.
 			if pqErr.Code == pq.ErrorCode("23505") {
 				//Let's retrieve the shortened url param.
-				url, err := rs.Store.Urls().GetByURL(r.Context(), body.URL)
+				url, err := rs.Store.GetURLByLongStr(r.Context(), body.URL)
 				if err != nil {
 					log(r).WithField("url", body.URL).Error(err)
 					render.Render(w, r, ErrInternalServerError)
@@ -119,7 +119,7 @@ func (rs Resource) HandleShortenURL(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, &resp)
 }
 
-//Shorten shortens a long url string
+// Shorten shortens a long url string
 func Shorten(originalURL string, len int) (string, error) {
 
 	param, err := encoding.GenUniqueParam("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", len)

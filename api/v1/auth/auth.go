@@ -8,14 +8,14 @@ import (
 	"github.com/nairobi-gophers/fupisha/store"
 )
 
-//Resource defines dependencies for auth handlers.
+// Resource defines dependencies for auth handlers.
 type Resource struct {
 	Store  store.Store
 	Config *config.Config
 	Mailer *provider.Mailer
 }
 
-//NewResource returns a configured authentication resource.
+// NewResource returns a configured authentication resource.
 func NewResource(store store.Store, cfg *config.Config, mailer *provider.Mailer) *Resource {
 	return &Resource{
 		Store:  store,
@@ -24,7 +24,7 @@ func NewResource(store store.Store, cfg *config.Config, mailer *provider.Mailer)
 	}
 }
 
-//FromContext extracts user id from a Context
+// FromContext extracts user id from a Context
 func FromContext(ctx context.Context) (string, bool) {
 	userID, ok := ctx.Value(userIDKey).(string)
 	return userID, ok

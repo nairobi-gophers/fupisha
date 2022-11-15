@@ -19,7 +19,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//ApiConfig declares the required api server dependencies.
+// ApiConfig declares the required api server dependencies.
 type ApiConfig struct {
 	Logger     *logrus.Logger
 	Cfg        *config.Config
@@ -28,7 +28,7 @@ type ApiConfig struct {
 	EnableCORS bool
 }
 
-//New configures application resources and routers.
+// New configures application resources and routers.
 func New(apiCfg *ApiConfig) (*chi.Mux, error) {
 
 	authResource := auth.NewResource(apiCfg.Store, apiCfg.Cfg, apiCfg.Mailer)
@@ -54,7 +54,7 @@ func New(apiCfg *ApiConfig) (*chi.Mux, error) {
 	//Redirect shortened urls
 	r.Get("/{urlParam}", func(w http.ResponseWriter, r *http.Request) {
 		param := chi.URLParam(r, "urlParam")
-		u, err := apiCfg.Store.Urls().GetByParam(r.Context(), param)
+		u, err := apiCfg.Store.GetURLByParam(r.Context(), param)
 		if err != nil {
 			logging.GetLogEntry(r).WithField("param", param).Error(err)
 			render.Render(w, r, url.ErrURLNotFound(errors.New("not found")))

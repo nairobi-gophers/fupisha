@@ -20,13 +20,13 @@ func TestUser(t *testing.T) {
 	wantEmail := "test_user@test.com"
 	wantPassword := "test_password"
 
-	u, err := s.Users().New(ctx, wantEmail, wantPassword)
+	u, err := s.NewUser(ctx, wantEmail, wantPassword)
 
 	if err != nil {
 		t.Fatalf("failed to create test_user1: %s", err)
 	}
 
-	got, err := s.Users().GetByEmail(ctx, wantEmail)
+	got, err := s.GetUserByEmail(ctx, wantEmail)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestUser(t *testing.T) {
 		t.Fatalf("failed to compare password: %s", err)
 	}
 
-	u1, err := s.Users().GetByVerificationToken(ctx, u.VerificationToken)
+	u1, err := s.GetUserByVerificationToken(ctx, u.VerificationToken)
 	if err != nil {
 		t.Fatalf("bad user verification token: %v", u.VerificationToken)
 	}
@@ -75,11 +75,11 @@ func TestUser(t *testing.T) {
 		t.Fatalf("got %+v want %+v", u1, want)
 	}
 
-	if err := s.Users().SetVerified(ctx, u1.ID); err != nil {
+	if err := s.SetUserVerified(ctx, u1.ID); err != nil {
 		t.Fatalf("failed to update the verified field: %s", err)
 	}
 
-	got1, err := s.Users().GetByEmail(ctx, u1.Email)
+	got1, err := s.GetUserByEmail(ctx, u1.Email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,5 +89,4 @@ func TestUser(t *testing.T) {
 	if got1.Verified != verified {
 		t.Fatalf("got %t want %t", got1.Verified, verified)
 	}
-
 }
