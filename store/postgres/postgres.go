@@ -11,76 +11,32 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Store is a postgresql implementation of our store interface
-type Store struct {
-	db        *sqlx.DB
-	userStore *userStore
-	urlStore  *urlStore
-}
+// compilation check for store.Store concrete implementation.
+var _ store.Store = (*Store)(nil)
 
-// Users returns a user store.
-func (s *Store) Users() *userStore {
-	return s.userStore
-}
-
-// Urls returns a url store.
-func (s *Store) Urls() *urlStore {
-	return s.urlStore
-}
-
-// Migrate migrates the store database schema.
-func (s *Store) Migrate() error {
-	for _, q := range migrate {
-		_, err := s.db.Exec(q)
-		if err != nil {
-			return errors.Wrap(err, "migrating schema")
-		}
-	}
-	return nil
-}
-
-// Drop drops the store database schema.
-func (s *Store) Drop() error {
-	for _, q := range drop {
-		_, err := s.db.Exec(q)
-		if err != nil {
-			return errors.Wrap(err, "dropping schema")
-		}
-	}
-	return nil
-}
-
-// Reset resets the store database to its initial state.
-func (s *Store) Reset() error {
-	err := s.Drop()
+// NewStore creates and returns an initialized postgresql store for use as our state backend.
+func NewStore(cfg *Config) (*Store, error) {
+	db, err := connect(cfg)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return s.Migrate()
+
+	s := Store{
+		&userStore{db: db},
+		&urlStore{db: db},
+	}
+
+	err = migrateState(db)
+	if err != nil {
+		return nil, err
+	}
+
+	return &s, nil
 }
 
-var _ store.Store = (*Store)(nil) //Validate that store object actually points to something.
-
-type Config struct {
-	//Host e.g. localhost:5432
-	Host string
-	//Password is the database user's password
-	Password string
-	//User is the database username
-	User string
-	//Name is the database name
-	Name string
-	//MaxIdleConns is the maximum number of conns in the idle conn pool
-	MaxIdleConns int
-	//MaxOpenConns is the maximum number of open conns to the database.
-	MaxOpenConns int
-	//DisableTLS enable TLS on connections to the database.
-	DisableTLS bool
-}
-
-// Connect connects to a postgres store and returns an initialized postgres store object.
+// connects to a postgres store and returns an initialized postgres store object.
 // address: localhost:5432
-func Connect(cfg *Config) (*Store, error) {
+func connect(cfg *Config) (*sqlx.DB, error) {
 	sslMode := "disable" //Should be set in the config object
 	q := make(url.Values)
 	q.Set("sslmode", sslMode)
@@ -110,18 +66,30 @@ func Connect(cfg *Config) (*Store, error) {
 		return nil, errors.Wrap(err, "connect: connection never ready")
 	}
 
-	s := Store{
-		db:        db,
-		userStore: &userStore{db: db},
-		urlStore:  &urlStore{db: db},
-	}
+	return db, nil
+}
 
-	err = s.Migrate()
-	if err != nil {
-		return nil, err
-	}
+type Config struct {
+	//Host e.g. localhost:5432
+	Host string
+	//Password is the database user's password
+	Password string
+	//User is the database username
+	User string
+	//Name is the database name
+	Name string
+	//MaxIdleConns is the maximum number of conns in the idle conn pool
+	MaxIdleConns int
+	//MaxOpenConns is the maximum number of open conns to the database.
+	MaxOpenConns int
+	//DisableTLS enable TLS on connections to the database.
+	DisableTLS bool
+}
 
-	return &s, nil
+// Store is a postgresql implementation of our store interface
+type Store struct {
+	*userStore
+	*urlStore
 }
 
 func statusCheck(ctx context.Context, db *sqlx.DB) error {
@@ -142,3 +110,34 @@ func statusCheck(ctx context.Context, db *sqlx.DB) error {
 	var tmp bool
 	return db.QueryRowContext(ctx, q).Scan(&tmp)
 }
+
+// migrates the store database schema.
+func migrateState(db *sqlx.DB) error {
+	for _, q := range migrate {
+		_, err := db.Exec(q)
+		if err != nil {
+			return errors.Wrap(err, "migrating schema")
+		}
+	}
+	return nil
+}
+
+// drops the store database schema.
+func dropState(db *sqlx.DB) error {
+	for _, q := range drop {
+		_, err := db.Exec(q)
+		if err != nil {
+			return errors.Wrap(err, "dropping schema")
+		}
+	}
+	return nil
+}
+
+// resets the store database to its initial state.
+//func resetState(db *sqlx.DB) error {
+//	err := dropState(db)
+//	if err != nil {
+//		return err
+//	}
+//	return migrateState(db)
+//}
