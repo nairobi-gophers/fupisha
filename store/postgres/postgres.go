@@ -11,24 +11,24 @@ import (
 	"github.com/pkg/errors"
 )
 
-//Store is a postgresql implementation of our store interface
+// Store is a postgresql implementation of our store interface
 type Store struct {
 	db        *sqlx.DB
 	userStore *userStore
 	urlStore  *urlStore
 }
 
-//Users returns a user store.
-func (s *Store) Users() store.UserStore {
+// Users returns a user store.
+func (s *Store) Users() *userStore {
 	return s.userStore
 }
 
-//Urls returns a url store.
-func (s *Store) Urls() store.URLStore {
+// Urls returns a url store.
+func (s *Store) Urls() *urlStore {
 	return s.urlStore
 }
 
-//Migrate migrates the store database schema.
+// Migrate migrates the store database schema.
 func (s *Store) Migrate() error {
 	for _, q := range migrate {
 		_, err := s.db.Exec(q)
@@ -39,7 +39,7 @@ func (s *Store) Migrate() error {
 	return nil
 }
 
-//Drop drops the store database schema.
+// Drop drops the store database schema.
 func (s *Store) Drop() error {
 	for _, q := range drop {
 		_, err := s.db.Exec(q)
@@ -78,8 +78,8 @@ type Config struct {
 	DisableTLS bool
 }
 
-//Connect connects to a postgres store and returns an initialized postgres store object.
-//address: localhost:5432
+// Connect connects to a postgres store and returns an initialized postgres store object.
+// address: localhost:5432
 func Connect(cfg *Config) (*Store, error) {
 	sslMode := "disable" //Should be set in the config object
 	q := make(url.Values)
