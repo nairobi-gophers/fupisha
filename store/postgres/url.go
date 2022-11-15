@@ -15,8 +15,8 @@ type urlStore struct {
 	db *sqlx.DB
 }
 
-//New created a new url record.
-func (u *urlStore) New(ctx context.Context, userID uuid.UUID, originalURL, shortenedURLParam string) (store.URL, error) {
+// NewURL creates a new url record.
+func (u *urlStore) NewURL(ctx context.Context, userID uuid.UUID, originalURL, shortenedURLParam string) (store.URL, error) {
 
 	//Lets check if its a valid UUID
 	// if _, err := uuid.FromString(userID); err != nil {
@@ -45,7 +45,8 @@ func (u *urlStore) New(ctx context.Context, userID uuid.UUID, originalURL, short
 	return ur, nil
 }
 
-func (u *urlStore) Get(ctx context.Context, id uuid.UUID) (store.URL, error) {
+// GetURLByID retrieves the short url by its given id.
+func (u *urlStore) GetURLByID(ctx context.Context, id uuid.UUID) (store.URL, error) {
 	var url store.URL
 
 	const q = `SELECT * FROM urls WHERE id=$1`
@@ -57,7 +58,8 @@ func (u *urlStore) Get(ctx context.Context, id uuid.UUID) (store.URL, error) {
 	return url, nil
 }
 
-func (u *urlStore) GetByParam(ctx context.Context, param string) (store.URL, error) {
+// GetURLByParam retrieves the short url by its given param.
+func (u *urlStore) GetURLByParam(ctx context.Context, param string) (store.URL, error) {
 	var url store.URL
 
 	const q = `SELECT * FROM urls WHERE short_url_param=$1`
@@ -68,8 +70,8 @@ func (u *urlStore) GetByParam(ctx context.Context, param string) (store.URL, err
 	return url, nil
 }
 
-//GetByURL retrieves the short url of the given long url.
-func (u *urlStore) GetByURL(ctx context.Context, longURL string) (store.URL, error) {
+// GetURLByLongStr retrieves the short url of the given long url.
+func (u *urlStore) GetURLByLongStr(ctx context.Context, longURL string) (store.URL, error) {
 	var url store.URL
 
 	const q = `SELECT * FROM urls WHERE original_url=$1`

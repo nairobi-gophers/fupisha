@@ -17,8 +17,8 @@ type userStore struct {
 	db *sqlx.DB
 }
 
-//New creates a new user record.
-func (s userStore) New(ctx context.Context, email, password string) (store.User, error) {
+// NewUser creates a new user record.
+func (s userStore) NewUser(ctx context.Context, email, password string) (store.User, error) {
 
 	var now time.Time = time.Now()
 
@@ -48,8 +48,8 @@ func (s userStore) New(ctx context.Context, email, password string) (store.User,
 	return user, nil
 }
 
-//Get finds a user by id
-func (s userStore) Get(ctx context.Context, id uuid.UUID) (store.User, error) {
+// GetUserByID finds a user by id
+func (s userStore) GetUserByID(ctx context.Context, id uuid.UUID) (store.User, error) {
 	user := store.User{}
 
 	const q = `SELECT id,email,password,verification_token,verified,verification_expires,created_at,updated_at FROM users WHERE id=$1`
@@ -64,8 +64,8 @@ func (s userStore) Get(ctx context.Context, id uuid.UUID) (store.User, error) {
 	return user, nil
 }
 
-//GetByEmail retrieves an existing user with the given email.
-func (s userStore) GetByEmail(ctx context.Context, email string) (store.User, error) {
+// GetUserByEmail retrieves an existing user with the given email.
+func (s userStore) GetUserByEmail(ctx context.Context, email string) (store.User, error) {
 	user := store.User{}
 
 	const q = `SELECT id,email,password,verification_token,verified,verification_expires,created_at,updated_at FROM users WHERE email=$1`
@@ -77,8 +77,8 @@ func (s userStore) GetByEmail(ctx context.Context, email string) (store.User, er
 	return user, nil
 }
 
-//GetByVerificationToken retrieves user whose verification token matches the given token string.
-func (s userStore) GetByVerificationToken(ctx context.Context, token uuid.UUID) (store.User, error) {
+// GetUserByVerificationToken retrieves user whose verification token matches the given token string.
+func (s userStore) GetUserByVerificationToken(ctx context.Context, token uuid.UUID) (store.User, error) {
 	user := store.User{}
 
 	const q = `SELECT id,email,password,verification_token,verified,verification_expires,created_at,updated_at FROM users WHERE verification_token=$1`
@@ -90,8 +90,8 @@ func (s userStore) GetByVerificationToken(ctx context.Context, token uuid.UUID) 
 	return user, nil
 }
 
-//SetAPIKey sets the api key for the given user id.
-func (s userStore) SetAPIKey(ctx context.Context, id, key uuid.UUID) error {
+// SetUserAPIKey sets the api key for the given user id.
+func (s userStore) SetUserAPIKey(ctx context.Context, id, key uuid.UUID) error {
 	user := store.User{
 		ID:     id,
 		APIKey: &key,
@@ -106,8 +106,8 @@ func (s userStore) SetAPIKey(ctx context.Context, id, key uuid.UUID) error {
 	return nil
 }
 
-//SetVerified updates the verified value for the user with the given user id.
-func (s userStore) SetVerified(ctx context.Context, id uuid.UUID) error {
+// SetUserVerified updates the verified value for the user with the given user id.
+func (s userStore) SetUserVerified(ctx context.Context, id uuid.UUID) error {
 	verified := true
 
 	const q = `UPDATE users SET verified=$1 WHERE id=$2`
