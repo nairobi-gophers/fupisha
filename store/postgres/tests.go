@@ -36,25 +36,30 @@ func NewTestDatabase(t *testing.T) (*Store, func()) {
 		DisableTLS: true,
 	}
 
-	s, err := Connect(opts)
+	db, err := connect(opts)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := statusCheck(ctx, s.db); err != nil {
+	if err := statusCheck(ctx, db); err != nil {
 		t.Fatalf("status check database: %s", err)
+	}
+
+	err = migrateState(db)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	closedb := func() {
 		t.Log("Closing database connection...")
 		//close database connection
-		s.db.Close()
+		db.Close()
 	}
 
 	dropdb := func() {
 		t.Log("Dropping database...")
 		//drop the database
-		err := s.Drop()
+		err := dropState(db)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -67,5 +72,8 @@ func NewTestDatabase(t *testing.T) (*Store, func()) {
 		purgeContainer()
 	}
 
-	return s, teardown
+	return &Store{
+		&userStore{db: db},
+		&urlStore{db: db},
+	}, teardown
 }
