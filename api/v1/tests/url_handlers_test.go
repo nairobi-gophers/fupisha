@@ -48,12 +48,12 @@ func TestUrl(t *testing.T) {
 		testPassword = "ih@veaStr0ngpassword"
 	)
 
-	u, err := store.Users().New(ctx, testEmail, testPassword)
+	u, err := store.NewUser(ctx, testEmail, testPassword)
 	if err != nil {
 		t.Fatalf("could not create test user %q", err)
 	}
 
-	_, err = store.Urls().New(ctx, u.ID, testURL, testParam)
+	_, err = store.NewURL(ctx, u.ID, testURL, testParam)
 	if err != nil {
 		t.Fatalf("could not insert the short param")
 	}

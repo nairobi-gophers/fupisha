@@ -38,7 +38,7 @@ func TestAuth(t *testing.T) {
 
 	ctx := context.Background()
 
-	u, err := store.Users().New(ctx, testEmail, testPassword)
+	u, err := store.NewUser(ctx, testEmail, testPassword)
 	if err != nil {
 		t.Fatalf("could not create test user %q", err)
 	}
