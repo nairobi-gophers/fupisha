@@ -75,7 +75,7 @@ func (srv *Server) Start() {
 	log.Printf("Listening on %s\n", srv.Addr)
 
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-quit
 	log.Println("Shutting down fupisha API server... Reason:", sig)
 

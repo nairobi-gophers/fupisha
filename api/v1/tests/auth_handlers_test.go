@@ -75,7 +75,7 @@ func TestAuth(t *testing.T) {
 			method:   "POST",
 			body:     `{"email":"parish@fupisha.io","password":"str0ngpa55w0rd"}`,
 			wantCode: http.StatusCreated,
-			wantBody: `{}`,
+			wantBody: `{"status":"OK","data":"signup successful, check your email to verify your account"}`,
 		},
 		{
 			name:     "Create a new user with an existing email",
@@ -122,7 +122,7 @@ func TestAuth(t *testing.T) {
 			url:      fmt.Sprintf("/auth/verify?v=%s", verificationToken),
 			method:   "GET",
 			wantCode: http.StatusOK,
-			wantBody: `{}`,
+			wantBody: `{"status":"OK","data":"verification successful."}`,
 		},
 	}
 
