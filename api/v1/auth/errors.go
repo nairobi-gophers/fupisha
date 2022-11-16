@@ -7,31 +7,31 @@ import (
 	"github.com/go-chi/render"
 )
 
-//ErrInvalidEmailOrPassword a wrong email or password field.
+// ErrInvalidEmailOrPassword a wrong email or password field.
 var ErrInvalidEmailOrPassword = errors.New("invalid email or password")
 
-//ErrUnknownLogin an unregistered email field.
+// ErrUnknownLogin an unregistered email field.
 var ErrUnknownLogin = errors.New("email not registered")
 
-//ErrMissingToken a missing authorization header with the Bearer token.
+// ErrMissingToken a missing authorization header with the Bearer token.
 var ErrMissingToken = errors.New("missing authorization header")
 
-//ErrNoSuchAccount a non-existent user account.
+// ErrNoSuchAccount a non-existent user account.
 var ErrNoSuchAccount = errors.New("no such account")
 
-//ErrEmailTaken an already registered email.
+// ErrEmailTaken an already registered email.
 var ErrEmailTaken = errors.New("that email is taken")
 
-//ErrLoginToken an invalid or expired .
+// ErrLoginToken an invalid or expired .
 var ErrLoginToken = errors.New("invalid or expired login token")
 
-//ErrAPIUnsupported an unsupported api version.
+// ErrAPIUnsupported an unsupported api version.
 var ErrAPIUnsupported = errors.New("unsupported api version")
 
-//ErrMissingAPIVersion a missing api version header with the version text.
+// ErrMissingAPIVersion a missing api version header with the version text.
 var ErrMissingAPIVersion = errors.New("missing api version header")
 
-//ErrInvalidVerificationToken an expired or invalid verification token.
+// ErrInvalidVerificationToken an expired or invalid verification token.
 var ErrInvalidVerificationToken = errors.New("invalid or expired verification token")
 
 // ErrResponse renderer type for handling all sorts of errors.
@@ -45,7 +45,7 @@ type ErrResponse struct {
 }
 
 // Render sets the application-specific error code in AppCode.
-func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (e *ErrResponse) Render(_ http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.HTTPStatusCode)
 	return nil
 }
