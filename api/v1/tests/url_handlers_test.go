@@ -3,7 +3,7 @@ package tests
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -79,7 +79,7 @@ func TestUrl(t *testing.T) {
 	}
 
 	logger := logging.NewLogger(cfg)
-	logger.SetOutput(ioutil.Discard)
+	logger.SetOutput(io.Discard)
 
 	testCfg := &api.ApiConfig{
 		Logger:     logger,
@@ -126,7 +126,7 @@ func TestUrl(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		req, err := http.NewRequest(tc.method, tc.url, ioutil.NopCloser(strings.NewReader(tc.body)))
+		req, err := http.NewRequest(tc.method, tc.url, io.NopCloser(strings.NewReader(tc.body)))
 		if err != nil {
 			t.Fatal(err)
 		}
