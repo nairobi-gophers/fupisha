@@ -73,14 +73,27 @@ func (rs Resource) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		VerificationURL:    rs.Config.BaseURL + ":" + rs.Config.Port + "/auth/verify/?v=" + encoding.Encode(u.VerificationToken),
 	}
 
-	if err := rs.Mailer.SendVerifyNotification(body.Email, verifyEmailContent); err != nil {
+	errc := make(chan error, 1)
+	go func(err chan error) {
+		err <- rs.Mailer.SendVerifyNotification(body.Email, verifyEmailContent)
+	}(errc)
+
+	if err := <-errc; err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
+	resBody := struct {
+		Status string `json:"status"`
+		Data   string `json:"data"`
+	}{
+		Status: http.StatusText(http.StatusOK),
+		Data:   "signup successful, check your email to verify your account",
+	}
+
 	render.Status(r, http.StatusCreated)
-	render.Respond(w, r, http.NoBody)
+	render.Respond(w, r, &resBody)
 }
 
 // HandleVerify verify the verification code sent with the signup email
@@ -131,16 +144,29 @@ func (rs Resource) HandleVerify(w http.ResponseWriter, r *http.Request) {
 		SiteURL:  "https://fupisha.io",
 	}
 
-	if err := rs.Mailer.SendWelcomeNotification(u.Email, welcomeEmailContent); err != nil {
+	errc := make(chan error, 1)
+	go func(err chan error) {
+		err <- rs.Mailer.SendWelcomeNotification(u.Email, welcomeEmailContent)
+	}(errc)
+
+	if err := <-errc; err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
+	resBody := struct {
+		Status string `json:"status"`
+		Data   string `json:"data"`
+	}{
+		Status: http.StatusText(http.StatusOK),
+		Data:   "verification successful.",
+	}
+
 	//We should redirect to a frontend page once the frontend is up and running. The page should have a text probably saying account verified successfully and that the user should have recieved a welcome email with
 	//login instructions.
 	render.Status(r, http.StatusOK)
-	render.Respond(w, r, http.NoBody)
+	render.Respond(w, r, &resBody)
 }
 
 // HandleLogin login handler for handling login requests
