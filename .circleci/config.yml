@@ -2,16 +2,16 @@ version: 2.1
 jobs:
   build:
     machine:
-      image: ubuntu-1604:202007-01
+      image: ubuntu-2004:2022.10.1
     working_directory: ~/fupisha
     steps:
       - checkout
       - run:
-          name: Install Go 1.15.11
+          name: Install Go 1.19.3
           command: |
             sudo rm -rf /usr/local/go
-            wget https://golang.org/dl/go1.15.11.linux-amd64.tar.gz
-            sudo tar -C /usr/local -xzf go1.15.11.linux-amd64.tar.gz
+            wget https://golang.org/dl/go1.19.3.linux-amd64.tar.gz
+            sudo tar -C /usr/local -xzf go1.19.3.linux-amd64.tar.gz
             which go
             go version
       - run:
@@ -25,13 +25,13 @@ jobs:
       - run:
           name: Run staticheck
           command: |
-              wget -O staticcheck.tgz https://github.com/dominikh/go-tools/releases/download/2021.1/staticcheck_linux_amd64.tar.gz
-              sudo tar -xzf staticcheck.tgz
-              ./staticcheck/staticcheck --version
-              ./staticcheck/staticcheck ./...
+            wget -O staticcheck.tgz https://github.com/dominikh/go-tools/releases/download/2022.1/staticcheck_linux_amd64.tar.gz
+            sudo tar -xzf staticcheck.tgz
+            ./staticcheck/staticcheck --version
+            ./staticcheck/staticcheck ./...
       - run:
           name: Run unit tests
-          command: go test -v ~/fupisha/store/postgres/ 
+          command: go test -v ~/fupisha/store/postgres/
       - run:
           name: Run integration tests
           command: go test -v ~/fupisha/api/v1/tests/ 
